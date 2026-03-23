@@ -1,0 +1,13 @@
+spring:
+  jpa:
+    show-sql: false
+
+springdoc:
+  swagger-ui:
+    url: /olma/api/v3/api-docs
+    config-url: /olma/api/v3/api-docs/swagger-config
+
+logging:
+  level:
+    com.olma: INFO
+    org.springframework: WARN
