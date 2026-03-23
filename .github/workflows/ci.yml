@@ -63,11 +63,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set image name
+        run: echo "IMAGE=ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')/olma-backend" >> $GITHUB_ENV
+
       - name: Build & Push
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/olma-backend:latest
-            ghcr.io/${{ github.repository_owner }}/olma-backend:${{ github.sha }}
+            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:${{ github.sha }}
