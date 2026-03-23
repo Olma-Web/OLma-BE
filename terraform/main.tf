@@ -1,0 +1,211 @@
+terraform {
+  required_version = ">= 1.5.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = var.region
+}
+
+# ============================================================
+# Network
+# ============================================================
+
+data "aws_vpc" "default" {
+  default = true
+}
+
+data "aws_subnets" "default" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+}
+
+# ============================================================
+# AMI
+# ============================================================
+
+data "aws_ami" "ubuntu_arm" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-arm64-server-*"]
+  }
+
+  filter {
+    name   = "state"
+    values = ["available"]
+  }
+}
+
+# ============================================================
+# Security Groups
+# ============================================================
+
+resource "aws_security_group" "backend" {
+  name        = "olma-backend-sg"
+  description = "Security group for OLma backend EC2"
+  vpc_id      = data.aws_vpc.default.id
+
+  ingress {
+    description = "SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Backend API"
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = { Name = "olma-backend-sg" }
+}
+
+resource "aws_security_group" "db" {
+  name        = "olma-db-sg"
+  description = "Security group for OLma RDS"
+  vpc_id      = data.aws_vpc.default.id
+
+  ingress {
+    description     = "PostgreSQL from backend"
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.backend.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = { Name = "olma-db-sg" }
+}
+
+# ============================================================
+# RDS (PostgreSQL)
+# ============================================================
+
+resource "aws_db_instance" "olma" {
+  identifier     = "olma"
+  engine         = "postgres"
+  engine_version = "17"
+  instance_class = var.db_instance_class
+
+  allocated_storage = 20
+  storage_type      = "gp3"
+
+  db_name  = "olma"
+  username = var.db_username
+  password = var.db_password
+
+  vpc_security_group_ids = [aws_security_group.db.id]
+  publicly_accessible    = false
+  skip_final_snapshot    = true
+
+  tags = { Name = "olma-db" }
+}
+
+# ============================================================
+# EC2
+# ============================================================
+
+resource "aws_key_pair" "olma" {
+  key_name   = "olma-backend-key"
+  public_key = var.ssh_public_key
+}
+
+resource "aws_instance" "backend" {
+  ami                    = data.aws_ami.ubuntu_arm.id
+  instance_type          = "t4g.small"
+  key_name               = aws_key_pair.olma.key_name
+  vpc_security_group_ids = [aws_security_group.backend.id]
+  subnet_id              = data.aws_subnets.default.ids[0]
+
+  user_data_replace_on_change = true
+
+  user_data = <<-SCRIPT
+    #!/bin/bash
+    set -e
+
+    # Docker
+    apt-get update
+    apt-get install -y docker.io
+    usermod -aG docker ubuntu
+    systemctl enable docker
+    systemctl start docker
+
+    # GHCR login
+    echo "${var.ghcr_token}" | docker login ghcr.io -u ${var.ghcr_username} --password-stdin
+
+    # Copy docker config for ubuntu user
+    mkdir -p /home/ubuntu/.docker
+    cp /root/.docker/config.json /home/ubuntu/.docker/config.json
+    chown -R ubuntu:ubuntu /home/ubuntu/.docker
+
+    # Env file (avoids special character issues in shell)
+    cat > /home/ubuntu/olma.env << 'ENVEOF'
+    SPRING_PROFILES_ACTIVE=prod
+    SPRING_DATASOURCE_URL=jdbc:postgresql://${aws_db_instance.olma.address}:5432/olma?sslmode=require
+    SPRING_DATASOURCE_USERNAME=${var.db_username}
+    SPRING_DATASOURCE_PASSWORD=${var.db_password}
+    ENVEOF
+    sed -i 's/^    //' /home/ubuntu/olma.env
+
+    # Backend container
+    docker run -d \
+      --name olma-backend \
+      --restart unless-stopped \
+      -p 8080:8080 \
+      --env-file /home/ubuntu/olma.env \
+      ghcr.io/${var.ghcr_image}:latest
+
+    # Watchtower (auto-update)
+    docker run -d \
+      --name watchtower \
+      --restart unless-stopped \
+      -v /var/run/docker.sock:/var/run/docker.sock \
+      -v /root/.docker/config.json:/config.json:ro \
+      containrrr/watchtower \
+      --interval 60 \
+      olma-backend
+  SCRIPT
+
+  root_block_device {
+    volume_size = 20
+    volume_type = "gp3"
+  }
+
+  tags = { Name = "olma-backend" }
+
+  depends_on = [aws_db_instance.olma]
+}
+
+resource "aws_eip" "backend" {
+  instance = aws_instance.backend.id
+
+  tags = { Name = "olma-backend-eip" }
+}

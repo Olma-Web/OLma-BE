@@ -1,0 +1,51 @@
+variable "region" {
+  description = "AWS region"
+  type        = string
+  default     = "ap-northeast-2"
+}
+
+# ---- SSH ----
+
+variable "ssh_public_key" {
+  description = "SSH public key (cat ~/.ssh/id_ed25519.pub)"
+  type        = string
+}
+
+# ---- GitHub Container Registry ----
+
+variable "ghcr_username" {
+  description = "GitHub username for GHCR login"
+  type        = string
+}
+
+variable "ghcr_token" {
+  description = "GitHub PAT with read:packages scope"
+  type        = string
+  sensitive   = true
+}
+
+variable "ghcr_image" {
+  description = "GHCR image name (e.g. olma-web/olma-backend)"
+  type        = string
+  default     = "olma-web/olma-backend"
+}
+
+# ---- Database ----
+
+variable "db_instance_class" {
+  description = "RDS instance class"
+  type        = string
+  default     = "db.t4g.micro"
+}
+
+variable "db_username" {
+  description = "Database master username"
+  type        = string
+  default     = "olma"
+}
+
+variable "db_password" {
+  description = "Database master password"
+  type        = string
+  sensitive   = true
+}

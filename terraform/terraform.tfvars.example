@@ -1,0 +1,10 @@
+# SSH public key (run: cat ~/.ssh/id_ed25519.pub)
+ssh_public_key = "ssh-ed25519 AAAA..."
+
+# GitHub
+ghcr_username = "your-github-username"
+ghcr_token    = "ghp_xxxxxxxxxxxx"
+ghcr_image    = "olma-web/olma-backend"
+
+# Database
+db_password = "your-secure-password"
