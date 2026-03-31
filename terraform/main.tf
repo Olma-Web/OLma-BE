@@ -65,7 +65,23 @@ resource "aws_security_group" "backend" {
   }
 
   ingress {
-    description = "Backend API"
+    description = "HTTP (Caddy)"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "HTTPS (Caddy)"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Backend API (direct)"
     from_port   = 8080
     to_port     = 8080
     protocol    = "tcp"
@@ -174,6 +190,23 @@ resource "aws_instance" "backend" {
     SPRING_DATASOURCE_PASSWORD=${var.db_password}
     ENVEOF
     sed -i 's/^    //' /home/ubuntu/olma.env
+
+    # Caddy (reverse proxy + auto HTTPS)
+    apt-get install -y debian-keyring debian-archive-keyring apt-transport-https curl
+    curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+    curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list
+    apt-get update
+    apt-get install -y caddy
+
+    cat > /etc/caddy/Caddyfile << 'CADDYEOF'
+    ${var.domain} {
+      reverse_proxy localhost:8080
+    }
+    CADDYEOF
+    sed -i 's/^    //' /etc/caddy/Caddyfile
+
+    systemctl enable caddy
+    systemctl restart caddy
 
     # Backend container
     docker run -d \

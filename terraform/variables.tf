@@ -4,6 +4,12 @@ variable "region" {
   default     = "ap-northeast-2"
 }
 
+variable "domain" {
+  description = "Domain for Caddy reverse proxy (HTTPS)"
+  type        = string
+  default     = "olma.lumie-infra.com"
+}
+
 # ---- SSH ----
 
 variable "ssh_public_key" {
