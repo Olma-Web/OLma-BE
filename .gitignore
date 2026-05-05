@@ -21,3 +21,5 @@ terraform/*.tfstate
 terraform/*.tfstate.backup
 terraform/*.tfvars
 !terraform/terraform.tfvars.example
+terraform/tfplan
+terraform/*.tfplan

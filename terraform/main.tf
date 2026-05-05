@@ -163,6 +163,10 @@ resource "aws_instance" "backend" {
 
   user_data_replace_on_change = true
 
+  credit_specification {
+    cpu_credits = "standard"
+  }
+
   user_data = <<-SCRIPT
     #!/bin/bash
     set -e
@@ -199,7 +203,7 @@ resource "aws_instance" "backend" {
     apt-get install -y caddy
 
     cat > /etc/caddy/Caddyfile << 'CADDYEOF'
-    ${var.domain} {
+    :80 {
       reverse_proxy localhost:8080
     }
     CADDYEOF
