@@ -220,13 +220,14 @@ resource "aws_instance" "backend" {
       --env-file /home/ubuntu/olma.env \
       ghcr.io/${var.ghcr_image}:latest
 
-    # Watchtower (auto-update)
+    # Watchtower (auto-update). Using nickfedor fork because containrrr is unmaintained
+    # since 2023 and ships an old Docker client incompatible with Docker Engine 27+.
     docker run -d \
       --name watchtower \
       --restart unless-stopped \
       -v /var/run/docker.sock:/var/run/docker.sock \
       -v /root/.docker/config.json:/config.json:ro \
-      containrrr/watchtower \
+      nickfedor/watchtower:1.16.1 \
       --interval 60 \
       olma-backend
   SCRIPT
