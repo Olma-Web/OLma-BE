@@ -45,7 +45,7 @@ public class RateSubmission {
     @Column(name = "work_format", nullable = false, length = 10)
     private WorkFormat workFormat;
 
-    @Column(nullable = false, length = 50)
+    @Column(length = 50)
     private String duration;
 
     @Column(nullable = false)
