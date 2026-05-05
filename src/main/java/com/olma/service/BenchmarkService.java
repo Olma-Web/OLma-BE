@@ -1,5 +1,6 @@
 package com.olma.service;
 
+import com.olma.domain.enums.WorkFormat;
 import com.olma.domain.repository.RateSubmissionRepository;
 import com.olma.dto.BenchmarkResult;
 import lombok.RequiredArgsConstructor;
@@ -17,11 +18,12 @@ public class BenchmarkService {
     private final RateSubmissionRepository rateSubmissionRepository;
 
     @Transactional(readOnly = true)
-    public BenchmarkResult getBenchmark(Long jobCategoryId, Long workTypeId,
-                                         Long experienceLevelId, Boolean isRemote,
-                                         String complexity, Integer userAmount) {
+    public BenchmarkResult getBenchmark(Long jobCategoryId, Long experienceLevelId,
+                                         WorkFormat workFormat, Integer userAmount) {
+        String workFormatStr = workFormat != null ? workFormat.name() : null;
+
         Object[] stats = rateSubmissionRepository.findBenchmarkStats(
-                jobCategoryId, workTypeId, experienceLevelId, isRemote, complexity);
+                jobCategoryId, experienceLevelId, workFormatStr);
 
         if (stats == null || stats.length == 0) {
             return BenchmarkResult.builder().n(0).build();
@@ -41,7 +43,7 @@ public class BenchmarkService {
         Integer p90 = toInt(row[5]);
 
         List<Object[]> distRows = rateSubmissionRepository.findDistribution(
-                jobCategoryId, workTypeId, experienceLevelId, isRemote, complexity, BUCKET_COUNT);
+                jobCategoryId, experienceLevelId, workFormatStr, BUCKET_COUNT);
 
         List<BenchmarkResult.DistributionBucket> distribution = distRows.stream()
                 .map(r -> BenchmarkResult.DistributionBucket.builder()
@@ -55,7 +57,7 @@ public class BenchmarkService {
         Double userPercentile = null;
         if (userAmount != null) {
             long belowCount = rateSubmissionRepository.countBelowOrEqual(
-                    jobCategoryId, workTypeId, experienceLevelId, isRemote, complexity, userAmount);
+                    jobCategoryId, experienceLevelId, workFormatStr, userAmount);
             userPercentile = Math.round((double) belowCount / n * 1000.0) / 10.0;
         }
 

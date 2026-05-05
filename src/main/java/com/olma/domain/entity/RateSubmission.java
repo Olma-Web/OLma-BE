@@ -1,6 +1,9 @@
 package com.olma.domain.entity;
 
-import com.olma.domain.enums.*;
+import com.olma.domain.enums.AmountUnit;
+import com.olma.domain.enums.SubmissionStatus;
+import com.olma.domain.enums.SubmissionType;
+import com.olma.domain.enums.WorkFormat;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -8,6 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -26,30 +30,23 @@ public class RateSubmission {
     private JobCategory jobCategory;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "work_type_id", nullable = false)
-    private WorkType workType;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "region_id")
-    private Region region;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "experience_level_id", nullable = false)
     private ExperienceLevel experienceLevel;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
     private SubmissionType submissionType;
 
-    @Column(nullable = false)
-    private Boolean isRemote;
-
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 10)
-    private Complexity complexity = Complexity.MEDIUM;
+    @Column(name = "work_format", nullable = false, length = 10)
+    private WorkFormat workFormat;
 
-    @Column(nullable = false, precision = 4, scale = 1)
-    private BigDecimal durationMonths;
+    @Column(nullable = false, length = 50)
+    private String duration;
 
     @Column(nullable = false)
     private Integer amount;
@@ -77,18 +74,15 @@ public class RateSubmission {
     private OffsetDateTime createdAt = OffsetDateTime.now();
 
     @Builder
-    public RateSubmission(JobCategory jobCategory, WorkType workType, Region region,
-                          ExperienceLevel experienceLevel, SubmissionType submissionType,
-                          Boolean isRemote, Complexity complexity, BigDecimal durationMonths,
+    public RateSubmission(JobCategory jobCategory, ExperienceLevel experienceLevel, User user,
+                          SubmissionType submissionType, WorkFormat workFormat, String duration,
                           Integer amount, AmountUnit amountUnit, UUID sessionId) {
         this.jobCategory = jobCategory;
-        this.workType = workType;
-        this.region = region;
         this.experienceLevel = experienceLevel;
+        this.user = user;
         this.submissionType = submissionType;
-        this.isRemote = isRemote;
-        this.complexity = complexity != null ? complexity : Complexity.MEDIUM;
-        this.durationMonths = durationMonths;
+        this.workFormat = workFormat;
+        this.duration = duration;
         this.amount = amount;
         this.amountUnit = amountUnit;
         this.sessionId = sessionId;
@@ -99,11 +93,34 @@ public class RateSubmission {
         if (amountUnit == AmountUnit.MONTHLY) {
             return amount;
         }
-        if (durationMonths != null && durationMonths.compareTo(BigDecimal.ZERO) > 0) {
+        BigDecimal months = parseDurationToMonths(duration);
+        if (months != null && months.compareTo(BigDecimal.ZERO) > 0) {
             return BigDecimal.valueOf(amount)
-                    .divide(durationMonths, 0, java.math.RoundingMode.HALF_UP)
+                    .divide(months, 0, RoundingMode.HALF_UP)
                     .intValue();
         }
-        return amount;
+        return null;
+    }
+
+    private static BigDecimal parseDurationToMonths(String d) {
+        if (d == null || d.isBlank()) {
+            return null;
+        }
+        return switch (d) {
+            case "1주일 이하" -> new BigDecimal("0.25");
+            case "2~3주" -> new BigDecimal("0.625");
+            case "1개월" -> BigDecimal.ONE;
+            case "2~3개월" -> new BigDecimal("2.5");
+            case "3개월 이상" -> new BigDecimal("3");
+            default -> tryParseNumeric(d);
+        };
+    }
+
+    private static BigDecimal tryParseNumeric(String d) {
+        try {
+            return new BigDecimal(d);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 }

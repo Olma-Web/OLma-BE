@@ -1,7 +1,13 @@
 package com.olma.service;
 
-import com.olma.domain.entity.*;
-import com.olma.domain.repository.*;
+import com.olma.domain.entity.ExperienceLevel;
+import com.olma.domain.entity.JobCategory;
+import com.olma.domain.entity.RateSubmission;
+import com.olma.domain.entity.User;
+import com.olma.domain.repository.ExperienceLevelRepository;
+import com.olma.domain.repository.JobCategoryRepository;
+import com.olma.domain.repository.RateSubmissionRepository;
+import com.olma.domain.repository.UserRepository;
 import com.olma.dto.RateSubmissionRequest;
 import com.olma.dto.RateSubmissionResponse;
 import lombok.RequiredArgsConstructor;
@@ -14,31 +20,26 @@ public class RateSubmissionService {
 
     private final RateSubmissionRepository rateSubmissionRepository;
     private final JobCategoryRepository jobCategoryRepository;
-    private final WorkTypeRepository workTypeRepository;
-    private final RegionRepository regionRepository;
     private final ExperienceLevelRepository experienceLevelRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public RateSubmissionResponse create(RateSubmissionRequest request) {
         JobCategory jobCategory = jobCategoryRepository.findById(request.getJobCategoryId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid job category"));
-        WorkType workType = workTypeRepository.findById(request.getWorkTypeId())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid work type"));
-        Region region = request.getRegionId() != null
-                ? regionRepository.findById(request.getRegionId()).orElse(null)
-                : null;
         ExperienceLevel experienceLevel = experienceLevelRepository.findById(request.getExperienceLevelId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid experience level"));
+        User user = request.getUserId() != null
+                ? userRepository.findById(request.getUserId()).orElse(null)
+                : null;
 
         RateSubmission submission = RateSubmission.builder()
                 .jobCategory(jobCategory)
-                .workType(workType)
-                .region(region)
                 .experienceLevel(experienceLevel)
+                .user(user)
                 .submissionType(request.getSubmissionType())
-                .isRemote(request.getIsRemote())
-                .complexity(request.getComplexity())
-                .durationMonths(request.getDurationMonths())
+                .workFormat(request.getWorkFormat())
+                .duration(request.getDuration())
                 .amount(request.getAmount())
                 .amountUnit(request.getAmountUnit())
                 .sessionId(request.getSessionId())
@@ -59,13 +60,10 @@ public class RateSubmissionService {
         return RateSubmissionResponse.builder()
                 .id(s.getId())
                 .jobCategoryName(s.getJobCategory().getName())
-                .workTypeName(s.getWorkType().getName())
-                .regionName(s.getRegion() != null ? s.getRegion().getName() : null)
                 .experienceLevelLabel(s.getExperienceLevel().getLabel())
                 .submissionType(s.getSubmissionType())
-                .isRemote(s.getIsRemote())
-                .complexity(s.getComplexity())
-                .durationMonths(s.getDurationMonths())
+                .workFormat(s.getWorkFormat())
+                .duration(s.getDuration())
                 .amount(s.getAmount())
                 .amountUnit(s.getAmountUnit())
                 .normalizedMonthly(s.getNormalizedMonthly())

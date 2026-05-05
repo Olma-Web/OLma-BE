@@ -1,6 +1,6 @@
 package com.olma.domain.enums;
 
 public enum SubmissionType {
-    ESTIMATE,
-    COMPARE
+    TRACK_A,
+    TRACK_B
 }

@@ -1,5 +1,6 @@
 package com.olma.controller;
 
+import com.olma.domain.enums.WorkFormat;
 import com.olma.dto.BenchmarkResult;
 import com.olma.service.BenchmarkService;
 import lombok.RequiredArgsConstructor;
@@ -18,12 +19,10 @@ public class BenchmarkController {
     @GetMapping
     public BenchmarkResult getBenchmark(
             @RequestParam Long jobCategoryId,
-            @RequestParam(required = false) Long workTypeId,
             @RequestParam(required = false) Long experienceLevelId,
-            @RequestParam(required = false) Boolean isRemote,
-            @RequestParam(required = false) String complexity,
+            @RequestParam(required = false) WorkFormat workFormat,
             @RequestParam(required = false) Integer userAmount) {
         return benchmarkService.getBenchmark(
-                jobCategoryId, workTypeId, experienceLevelId, isRemote, complexity, userAmount);
+                jobCategoryId, experienceLevelId, workFormat, userAmount);
     }
 }

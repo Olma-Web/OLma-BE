@@ -21,17 +21,13 @@ public interface RateSubmissionRepository extends JpaRepository<RateSubmission, 
             WHERE status = 'ACTIVE'
               AND is_outlier = false
               AND job_category_id = :jobCategoryId
-              AND (:workTypeId IS NULL OR work_type_id = :workTypeId)
               AND (:experienceLevelId IS NULL OR experience_level_id = :experienceLevelId)
-              AND (:isRemote IS NULL OR is_remote = :isRemote)
-              AND (:complexity IS NULL OR complexity = :complexity)
+              AND (:workFormat IS NULL OR work_format = :workFormat)
             """, nativeQuery = true)
     Object[] findBenchmarkStats(
             @Param("jobCategoryId") Long jobCategoryId,
-            @Param("workTypeId") Long workTypeId,
             @Param("experienceLevelId") Long experienceLevelId,
-            @Param("isRemote") Boolean isRemote,
-            @Param("complexity") String complexity
+            @Param("workFormat") String workFormat
     );
 
     @Query(value = """
@@ -43,10 +39,8 @@ public interface RateSubmissionRepository extends JpaRepository<RateSubmission, 
                 WHERE status = 'ACTIVE'
                   AND is_outlier = false
                   AND job_category_id = :jobCategoryId
-                  AND (:workTypeId IS NULL OR work_type_id = :workTypeId)
                   AND (:experienceLevelId IS NULL OR experience_level_id = :experienceLevelId)
-                  AND (:isRemote IS NULL OR is_remote = :isRemote)
-                  AND (:complexity IS NULL OR complexity = :complexity)
+                  AND (:workFormat IS NULL OR work_format = :workFormat)
             ),
             bucketed AS (
                 SELECT
@@ -57,10 +51,8 @@ public interface RateSubmissionRepository extends JpaRepository<RateSubmission, 
                 WHERE r.status = 'ACTIVE'
                   AND r.is_outlier = false
                   AND r.job_category_id = :jobCategoryId
-                  AND (:workTypeId IS NULL OR r.work_type_id = :workTypeId)
                   AND (:experienceLevelId IS NULL OR r.experience_level_id = :experienceLevelId)
-                  AND (:isRemote IS NULL OR r.is_remote = :isRemote)
-                  AND (:complexity IS NULL OR r.complexity = :complexity)
+                  AND (:workFormat IS NULL OR r.work_format = :workFormat)
             )
             SELECT
                 bucket,
@@ -73,10 +65,8 @@ public interface RateSubmissionRepository extends JpaRepository<RateSubmission, 
             """, nativeQuery = true)
     List<Object[]> findDistribution(
             @Param("jobCategoryId") Long jobCategoryId,
-            @Param("workTypeId") Long workTypeId,
             @Param("experienceLevelId") Long experienceLevelId,
-            @Param("isRemote") Boolean isRemote,
-            @Param("complexity") String complexity,
+            @Param("workFormat") String workFormat,
             @Param("bucketCount") int bucketCount
     );
 
@@ -86,18 +76,14 @@ public interface RateSubmissionRepository extends JpaRepository<RateSubmission, 
             WHERE status = 'ACTIVE'
               AND is_outlier = false
               AND job_category_id = :jobCategoryId
-              AND (:workTypeId IS NULL OR work_type_id = :workTypeId)
               AND (:experienceLevelId IS NULL OR experience_level_id = :experienceLevelId)
-              AND (:isRemote IS NULL OR is_remote = :isRemote)
-              AND (:complexity IS NULL OR complexity = :complexity)
+              AND (:workFormat IS NULL OR work_format = :workFormat)
               AND normalized_monthly <= :normalizedMonthly
             """, nativeQuery = true)
     long countBelowOrEqual(
             @Param("jobCategoryId") Long jobCategoryId,
-            @Param("workTypeId") Long workTypeId,
             @Param("experienceLevelId") Long experienceLevelId,
-            @Param("isRemote") Boolean isRemote,
-            @Param("complexity") String complexity,
+            @Param("workFormat") String workFormat,
             @Param("normalizedMonthly") Integer normalizedMonthly
     );
 }

@@ -1,15 +1,15 @@
 package com.olma.dto;
 
 import com.olma.domain.enums.AmountUnit;
-import com.olma.domain.enums.Complexity;
 import com.olma.domain.enums.SubmissionType;
+import com.olma.domain.enums.WorkFormat;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 @Getter
@@ -20,24 +20,19 @@ public class RateSubmissionRequest {
     private Long jobCategoryId;
 
     @NotNull
-    private Long workTypeId;
-
-    private Long regionId;
-
-    @NotNull
     private Long experienceLevelId;
+
+    private Long userId;
 
     @NotNull
     private SubmissionType submissionType;
 
     @NotNull
-    private Boolean isRemote;
+    private WorkFormat workFormat;
 
-    private Complexity complexity = Complexity.MEDIUM;
-
-    @NotNull
-    @Positive
-    private BigDecimal durationMonths;
+    @NotBlank
+    @Size(max = 50)
+    private String duration;
 
     @NotNull
     @PositiveOrZero
