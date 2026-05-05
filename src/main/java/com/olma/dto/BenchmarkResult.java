@@ -24,5 +24,9 @@ public class BenchmarkResult {
         private int rangeStart;
         private int rangeEnd;
         private long count;
+        private Long cohortSize;
+        private Long certHoldersCount;
+        private Double certRatio;
+        private String mostCommonDuration;
     }
 }

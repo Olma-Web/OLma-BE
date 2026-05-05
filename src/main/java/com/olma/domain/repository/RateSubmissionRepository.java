@@ -1,13 +1,17 @@
 package com.olma.domain.repository;
 
 import com.olma.domain.entity.RateSubmission;
+import com.olma.domain.enums.SubmissionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
 public interface RateSubmissionRepository extends JpaRepository<RateSubmission, Long> {
+
+    List<RateSubmission> findAllByUser_IdAndStatusOrderByCreatedAtDesc(Long userId, SubmissionStatus status);
 
     @Query(value = """
             SELECT
@@ -45,6 +49,9 @@ public interface RateSubmissionRepository extends JpaRepository<RateSubmission, 
             bucketed AS (
                 SELECT
                     width_bucket(r.normalized_monthly, b.min_val, b.max_val + 1, :bucketCount) AS bucket,
+                    r.user_id,
+                    r.duration,
+                    r.amount_unit,
                     b.min_val,
                     b.max_val
                 FROM rate_submissions r, bounds b
@@ -56,11 +63,17 @@ public interface RateSubmissionRepository extends JpaRepository<RateSubmission, 
             )
             SELECT
                 bucket,
-                min_val + (bucket - 1) * (max_val - min_val) / :bucketCount AS range_start,
-                min_val + bucket * (max_val - min_val) / :bucketCount AS range_end,
-                count(*) AS count
+                MIN(min_val) + (bucket - 1) * (MIN(max_val) - MIN(min_val)) / :bucketCount AS range_start,
+                MIN(min_val) + bucket * (MIN(max_val) - MIN(min_val)) / :bucketCount AS range_end,
+                count(*) AS count,
+                count(DISTINCT user_id) FILTER (WHERE user_id IS NOT NULL) AS cohort_size,
+                count(DISTINCT user_id) FILTER (
+                    WHERE user_id IS NOT NULL
+                      AND EXISTS (SELECT 1 FROM user_certificates uc WHERE uc.user_id = bucketed.user_id)
+                ) AS cert_holders_count,
+                mode() WITHIN GROUP (ORDER BY duration) FILTER (WHERE amount_unit = 'TOTAL') AS most_common_duration
             FROM bucketed
-            GROUP BY bucket, min_val, max_val
+            GROUP BY bucket
             ORDER BY bucket
             """, nativeQuery = true)
     List<Object[]> findDistribution(
@@ -86,4 +99,27 @@ public interface RateSubmissionRepository extends JpaRepository<RateSubmission, 
             @Param("workFormat") String workFormat,
             @Param("normalizedMonthly") Integer normalizedMonthly
     );
+
+    @Modifying
+    @Query(value = """
+            WITH percentiles AS (
+                SELECT
+                    job_category_id,
+                    experience_level_id,
+                    percentile_cont(0.05) WITHIN GROUP (ORDER BY normalized_monthly) AS p5,
+                    percentile_cont(0.95) WITHIN GROUP (ORDER BY normalized_monthly) AS p95
+                FROM rate_submissions
+                WHERE status = 'ACTIVE' AND normalized_monthly IS NOT NULL
+                GROUP BY job_category_id, experience_level_id
+                HAVING count(*) >= :minThreshold
+            )
+            UPDATE rate_submissions r
+            SET is_outlier = (r.normalized_monthly < p.p5 OR r.normalized_monthly > p.p95)
+            FROM percentiles p
+            WHERE r.job_category_id = p.job_category_id
+              AND r.experience_level_id = p.experience_level_id
+              AND r.status = 'ACTIVE'
+              AND r.normalized_monthly IS NOT NULL
+            """, nativeQuery = true)
+    int markOutliers(@Param("minThreshold") int minThreshold);
 }

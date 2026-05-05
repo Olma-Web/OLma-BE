@@ -123,4 +123,8 @@ public class RateSubmission {
             return null;
         }
     }
+
+    public void hide() {
+        this.status = SubmissionStatus.HIDDEN;
+    }
 }

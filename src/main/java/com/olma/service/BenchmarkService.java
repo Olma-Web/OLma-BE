@@ -46,12 +46,7 @@ public class BenchmarkService {
                 jobCategoryId, experienceLevelId, workFormatStr, BUCKET_COUNT);
 
         List<BenchmarkResult.DistributionBucket> distribution = distRows.stream()
-                .map(r -> BenchmarkResult.DistributionBucket.builder()
-                        .bucket(((Number) r[0]).intValue())
-                        .rangeStart(((Number) r[1]).intValue())
-                        .rangeEnd(((Number) r[2]).intValue())
-                        .count(((Number) r[3]).longValue())
-                        .build())
+                .map(this::toBucket)
                 .toList();
 
         Double userPercentile = null;
@@ -73,7 +68,29 @@ public class BenchmarkService {
                 .build();
     }
 
+    private BenchmarkResult.DistributionBucket toBucket(Object[] r) {
+        Long cohortSize = toLong(r[4]);
+        Long certHolders = toLong(r[5]);
+        Double certRatio = (cohortSize != null && cohortSize > 0 && certHolders != null)
+                ? Math.round(((double) certHolders / cohortSize) * 1000.0) / 1000.0
+                : null;
+        return BenchmarkResult.DistributionBucket.builder()
+                .bucket(((Number) r[0]).intValue())
+                .rangeStart(((Number) r[1]).intValue())
+                .rangeEnd(((Number) r[2]).intValue())
+                .count(((Number) r[3]).longValue())
+                .cohortSize(cohortSize)
+                .certHoldersCount(certHolders)
+                .certRatio(certRatio)
+                .mostCommonDuration(r[6] != null ? r[6].toString() : null)
+                .build();
+    }
+
     private Integer toInt(Object val) {
         return val != null ? ((Number) val).intValue() : null;
+    }
+
+    private Long toLong(Object val) {
+        return val != null ? ((Number) val).longValue() : null;
     }
 }

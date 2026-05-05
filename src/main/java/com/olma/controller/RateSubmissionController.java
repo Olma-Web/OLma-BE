@@ -25,4 +25,10 @@ public class RateSubmissionController {
     public RateSubmissionResponse getById(@PathVariable Long id) {
         return rateSubmissionService.getById(id);
     }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) {
+        rateSubmissionService.delete(id);
+    }
 }

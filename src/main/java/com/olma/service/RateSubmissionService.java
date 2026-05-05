@@ -56,6 +56,13 @@ public class RateSubmissionService {
         return toResponse(submission);
     }
 
+    @Transactional
+    public void delete(Long id) {
+        RateSubmission submission = rateSubmissionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Submission not found"));
+        submission.hide();
+    }
+
     private RateSubmissionResponse toResponse(RateSubmission s) {
         return RateSubmissionResponse.builder()
                 .id(s.getId())
