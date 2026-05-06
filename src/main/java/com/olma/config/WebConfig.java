@@ -1,5 +1,7 @@
 package com.olma.config;
 
+import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -8,10 +10,16 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.nio.charset.StandardCharsets;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+
+    @Bean
+    public Jackson2ObjectMapperBuilderCustomizer jacksonKstSerializer() {
+        return builder -> builder.serializerByType(OffsetDateTime.class, new KstOffsetDateTimeSerializer());
+    }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {

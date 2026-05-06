@@ -16,6 +16,7 @@ import com.olma.domain.repository.UserRepository;
 import com.olma.dto.SubmissionTimelineItem;
 import com.olma.dto.UserProfileResponse;
 import com.olma.dto.UserProfileUpdateRequest;
+import com.olma.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +37,7 @@ public class UserProfileService {
     @Transactional(readOnly = true)
     public UserProfileResponse getProfile(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found: id=" + userId));
         List<UserCertificate> certs = userCertificateRepository.findAllByUser_Id(userId);
         return toResponse(user, certs);
     }
@@ -44,7 +45,7 @@ public class UserProfileService {
     @Transactional
     public UserProfileResponse updateProfile(Long userId, UserProfileUpdateRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found: id=" + userId));
 
         ExperienceLevel experienceLevel = request.getExperienceLevelId() != null
                 ? experienceLevelRepository.findById(request.getExperienceLevelId())
@@ -76,7 +77,7 @@ public class UserProfileService {
     @Transactional(readOnly = true)
     public List<SubmissionTimelineItem> getSubmissions(Long userId) {
         if (!userRepository.existsById(userId)) {
-            throw new IllegalArgumentException("User not found");
+            throw new NotFoundException("User not found: id=" + userId);
         }
         return rateSubmissionRepository
                 .findAllByUser_IdAndStatusOrderByCreatedAtDesc(userId, SubmissionStatus.ACTIVE)

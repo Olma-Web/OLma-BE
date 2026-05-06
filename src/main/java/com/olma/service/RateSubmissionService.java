@@ -10,6 +10,7 @@ import com.olma.domain.repository.RateSubmissionRepository;
 import com.olma.domain.repository.UserRepository;
 import com.olma.dto.RateSubmissionRequest;
 import com.olma.dto.RateSubmissionResponse;
+import com.olma.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,14 +53,14 @@ public class RateSubmissionService {
     @Transactional(readOnly = true)
     public RateSubmissionResponse getById(Long id) {
         RateSubmission submission = rateSubmissionRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Submission not found"));
+                .orElseThrow(() -> new NotFoundException("Submission not found: id=" + id));
         return toResponse(submission);
     }
 
     @Transactional
     public void delete(Long id) {
         RateSubmission submission = rateSubmissionRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Submission not found"));
+                .orElseThrow(() -> new NotFoundException("Submission not found: id=" + id));
         submission.hide();
     }
 
