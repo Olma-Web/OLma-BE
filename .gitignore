@@ -14,6 +14,9 @@ out/
 # OS
 .DS_Store
 
+# Environment
+.env
+
 # Terraform
 terraform/.terraform/
 terraform/.terraform.lock.hcl

@@ -1,6 +1,7 @@
 package com.olma.controller;
 
 import com.olma.dto.ErrorResponse;
+import com.olma.exception.DuplicateValueException;
 import com.olma.exception.NotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
@@ -19,6 +20,11 @@ import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+
+    @ExceptionHandler(DuplicateValueException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateValue(DuplicateValueException ex, HttpServletRequest req) {
+        return build(HttpStatus.CONFLICT, ex.getMessage(), req.getRequestURI(), null);
+    }
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFound(NotFoundException ex, HttpServletRequest req) {

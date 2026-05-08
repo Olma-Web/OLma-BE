@@ -8,3 +8,7 @@ spring:
 logging:
   level:
     com.olma: DEBUG
+
+jwt:
+  secret: ${JWT_SECRET:K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols=}
+  expiration: 86400000

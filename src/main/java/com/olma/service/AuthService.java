@@ -1,0 +1,82 @@
+package com.olma.service;
+
+import com.olma.config.JwtProvider;
+import com.olma.domain.entity.*;
+import com.olma.domain.repository.*;
+import com.olma.dto.AuthSignupRequest;
+import com.olma.dto.AuthSignupResponse;
+import com.olma.exception.DuplicateValueException;
+import com.olma.exception.NotFoundException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class AuthService {
+
+    private final UserRepository userRepository;
+    private final UserCertificateRepository userCertificateRepository;
+    private final ExperienceLevelRepository experienceLevelRepository;
+    private final JobCategoryRepository jobCategoryRepository;
+    private final CertificateTypeRepository certificateTypeRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final JwtProvider jwtProvider;
+
+    @Transactional
+    public AuthSignupResponse signup(AuthSignupRequest request) {
+        // email 검증
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new DuplicateValueException("email", request.getEmail());
+        }
+
+        // Nickname unique 검증
+        if (userRepository.existsByNickname(request.getNickname())) {
+            throw new DuplicateValueException("nickname", request.getNickname());
+        }
+
+        ExperienceLevel experienceLevel = request.getExperienceLevelId() != null
+                ? experienceLevelRepository.findById(request.getExperienceLevelId())
+                  .orElseThrow(() -> new NotFoundException("ExperienceLevel not found: id=" + request.getExperienceLevelId()))
+                : null;
+
+        JobCategory jobCategory = request.getJobCategoryId() != null
+                ? jobCategoryRepository.findById(request.getJobCategoryId())
+                  .orElseThrow(() -> new NotFoundException("JobCategory not found: id=" + request.getJobCategoryId()))
+                : null;
+
+        User user = userRepository.save(User.builder()
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .nickname(request.getNickname())
+                .experienceLevel(experienceLevel)
+                .jobCategory(jobCategory)
+                .build());
+
+        if (request.getCertificateTypeIds() != null && !request.getCertificateTypeIds().isEmpty()) {
+            List<UserCertificate> certificates = request.getCertificateTypeIds().stream()
+                    .map(certId -> {
+                        CertificateType certificateType = certificateTypeRepository.findById(certId)
+                                .orElseThrow(() -> new NotFoundException("CertificateType not found: id=" + certId));
+                        return UserCertificate.builder()
+                                .user(user)
+                                .certificateType(certificateType)
+                                .build();
+
+                    })
+                    .toList();
+            userCertificateRepository.saveAll(certificates);
+        }
+
+        return AuthSignupResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .nickname(user.getNickname())
+                .agreementAt(user.getAgreementAt())
+                .token(jwtProvider.generate(user.getId()))
+                .build();
+    }
+}
