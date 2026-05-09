@@ -8,3 +8,6 @@ ghcr_image    = "olma-web/olma-backend"
 
 # Database
 db_password = "your-secure-password"
+
+# JWT (generate with: openssl rand -base64 32)
+jwt_secret = "BASE64_ENCODED_SECRET_HERE"

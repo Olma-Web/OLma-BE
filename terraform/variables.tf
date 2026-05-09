@@ -55,3 +55,11 @@ variable "db_password" {
   type        = string
   sensitive   = true
 }
+
+# ---- JWT ----
+
+variable "jwt_secret" {
+  description = "BASE64-encoded HMAC-SHA256 secret for JWT signing (>= 32 bytes after decode)"
+  type        = string
+  sensitive   = true
+}

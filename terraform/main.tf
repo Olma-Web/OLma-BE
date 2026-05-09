@@ -192,6 +192,7 @@ resource "aws_instance" "backend" {
     SPRING_DATASOURCE_URL=jdbc:postgresql://${aws_db_instance.olma.address}:5432/olma?sslmode=require
     SPRING_DATASOURCE_USERNAME=${var.db_username}
     SPRING_DATASOURCE_PASSWORD=${var.db_password}
+    JWT_SECRET=${var.jwt_secret}
     ENVEOF
     sed -i 's/^    //' /home/ubuntu/olma.env
 
