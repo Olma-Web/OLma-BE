@@ -4,6 +4,7 @@ import com.olma.dto.SubmissionTimelineItem;
 import com.olma.dto.UserProfileResponse;
 import com.olma.dto.UserProfileUpdateRequest;
 import com.olma.service.UserProfileService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/users")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "BearerAuth")
 public class UserProfileController {
 
     private final UserProfileService userProfileService;

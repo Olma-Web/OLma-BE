@@ -1,7 +1,9 @@
 package com.olma.config;
 
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,6 +16,11 @@ public class OpenApiConfig {
                 .info(new Info()
                         .title("OLma API")
                         .version("v1")
-                        .description("OLma - 외주 단가 벤치마크 플랫폼 API"));
+                        .description("OLma - 외주 단가 벤치마크 플랫폼 API"))
+                .components(new Components()
+                        .addSecuritySchemes("BearerAuth", new SecurityScheme()
+                                .type(SecurityScheme.Type.HTTP)
+                                .scheme("bearer")
+                                .bearerFormat("JWT")));
     }
 }
