@@ -9,6 +9,7 @@ import com.olma.domain.repository.JobCategoryRepository;
 import com.olma.domain.repository.RegionRepository;
 import com.olma.domain.repository.WorkTypeRepository;
 import com.olma.dto.JobCategoryResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +22,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/v1/reference")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "BearerAuth")
 public class ReferenceDataController {
 
     private final JobCategoryRepository jobCategoryRepository;
