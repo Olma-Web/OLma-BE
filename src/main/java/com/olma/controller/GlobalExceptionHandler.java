@@ -5,6 +5,7 @@ import com.olma.exception.DuplicateValueException;
 import com.olma.exception.InvalidCredentialsException;
 import com.olma.exception.NotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -21,6 +22,11 @@ import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex, HttpServletRequest req) {
+        return build(HttpStatus.CONFLICT, "Duplicate value", req.getRequestURI(), null);
+    }
 
     @ExceptionHandler(DuplicateValueException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateValue(DuplicateValueException ex, HttpServletRequest req) {

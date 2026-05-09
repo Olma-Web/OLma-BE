@@ -33,12 +33,12 @@ public class AuthService {
     public AuthSignupResponse signup(AuthSignupRequest request) {
         // email 검증
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new DuplicateValueException("email", request.getEmail());
+            throw new DuplicateValueException("email");
         }
 
         // Nickname unique 검증
         if (userRepository.existsByNickname(request.getNickname())) {
-            throw new DuplicateValueException("nickname", request.getNickname());
+            throw new DuplicateValueException("nickname");
         }
 
         ExperienceLevel experienceLevel = request.getExperienceLevelId() != null
@@ -60,17 +60,12 @@ public class AuthService {
                 .build());
 
         if (request.getCertificateTypeIds() != null && !request.getCertificateTypeIds().isEmpty()) {
-            List<UserCertificate> certificates = request.getCertificateTypeIds().stream()
-                    .map(certId -> {
-                        CertificateType certificateType = certificateTypeRepository.findById(certId)
-                                .orElseThrow(() -> new NotFoundException("CertificateType not found: id=" + certId));
-                        return UserCertificate.builder()
-                                .user(user)
-                                .certificateType(certificateType)
-                                .build();
-
-                    })
-                    .toList();
+            List<Long> ids = request.getCertificateTypeIds();
+            List<CertificateType> types = certificateTypeRepository.findAllById(ids);
+            if (ids.size() != types.size()) {
+                throw new NotFoundException("CertificateType not found");
+            }
+            List<UserCertificate> certificates = types.stream().map(t -> UserCertificate.builder().user(user).certificateType(t).build()).toList();
             userCertificateRepository.saveAll(certificates);
         }
 
