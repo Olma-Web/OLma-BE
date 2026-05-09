@@ -1,5 +1,7 @@
 package com.olma.controller;
 
+import com.olma.dto.AuthLoginRequest;
+import com.olma.dto.AuthLoginResponse;
 import com.olma.dto.AuthSignupRequest;
 import com.olma.dto.AuthSignupResponse;
 import com.olma.service.AuthService;
@@ -20,5 +22,10 @@ public class AuthController {
     @PostMapping("/signup")
     public AuthSignupResponse signUp(@Valid @RequestBody AuthSignupRequest request) {
         return authService.signup(request);
+    }
+
+    @PostMapping("/login")
+    public AuthLoginResponse login(@Valid @RequestBody AuthLoginRequest request) {
+        return authService.login(request);
     }
 }

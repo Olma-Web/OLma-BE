@@ -3,9 +3,12 @@ package com.olma.service;
 import com.olma.config.JwtProvider;
 import com.olma.domain.entity.*;
 import com.olma.domain.repository.*;
+import com.olma.dto.AuthLoginRequest;
+import com.olma.dto.AuthLoginResponse;
 import com.olma.dto.AuthSignupRequest;
 import com.olma.dto.AuthSignupResponse;
 import com.olma.exception.DuplicateValueException;
+import com.olma.exception.InvalidCredentialsException;
 import com.olma.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -76,7 +79,22 @@ public class AuthService {
                 .email(user.getEmail())
                 .nickname(user.getNickname())
                 .agreementAt(user.getAgreementAt())
-                .token(jwtProvider.generate(user.getId()))
+                .token(jwtProvider.generateJwtToken(user.getId()))
                 .build();
     }
+
+    @Transactional
+    public AuthLoginResponse login(AuthLoginRequest request) {
+
+        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new InvalidCredentialsException("Invalid credentials"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new InvalidCredentialsException("Invalid credentials");
+        }
+        return AuthLoginResponse.builder()
+                .id(user.getId())
+                .token(jwtProvider.generateJwtToken(user.getId()))
+                .build();
+    }
+
 }

@@ -21,7 +21,7 @@ public class JwtProvider {
         this.expiration = expiration;
     }
 
-    public String generate(Long userId) {
+    public String generateJwtToken(Long userId) {
         Date now = new Date();
         return Jwts.builder()
                 .subject(String.valueOf(userId))
@@ -30,4 +30,17 @@ public class JwtProvider {
                 .signWith(key)
                 .compact();
     }
+
+    public Long validateJwtToken(String token) {
+        String userId = Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject();
+
+        return Long.parseLong(userId);
+    }
+
+
 }
