@@ -31,6 +31,12 @@ public class JwtFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
 
+        // CORS preflight requests carry no Authorization header; let Spring MVC handle them.
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            chain.doFilter(req, res);
+            return;
+        }
+
         if (PERMIT_PREFIXES.stream().anyMatch(prefix -> request.getRequestURI().startsWith(prefix))) {
             chain.doFilter(req, res);
             return;
