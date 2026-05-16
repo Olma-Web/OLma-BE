@@ -7,6 +7,7 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -52,12 +53,17 @@ public class JwtFilter implements Filter {
         try {
             Long userId = jwtProvider.validateJwtToken(header.substring(7));
             request.setAttribute("userId", userId);
+            MDC.put("userId", String.valueOf(userId));
         } catch (JwtException e) {
             writeErrorResponse(response, request, HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않거나 만료된 토큰입니다.");
             return;
         }
 
-        chain.doFilter(req, res);
+        try {
+            chain.doFilter(req, res);
+        } finally {
+            MDC.remove("userId");
+        }
     }
 
     private void writeErrorResponse(HttpServletResponse response, HttpServletRequest request, int status, String message) throws IOException {
