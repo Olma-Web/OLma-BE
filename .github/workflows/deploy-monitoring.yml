@@ -1,0 +1,23 @@
+name: Deploy Monitoring
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'monitoring/**'
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Connect olma-backend to monitoring network
+        run: |
+          docker network create monitoring 2>/dev/null || true
+          docker network connect monitoring olma-backend 2>/dev/null || true
+
+      - name: Deploy monitoring stack
+        working-directory: monitoring
+        run: docker compose up -d --remove-orphans
