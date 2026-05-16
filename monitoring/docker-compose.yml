@@ -47,7 +47,7 @@ services:
     networks:
       - monitoring
     restart: unless-stopped
-    mem_limit: 80m
+    mem_limit: 120m
     depends_on:
       - loki
 
