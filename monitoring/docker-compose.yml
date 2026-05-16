@@ -1,6 +1,7 @@
 networks:
   monitoring:
     name: monitoring
+    external: true
 
 services:
   loki:
