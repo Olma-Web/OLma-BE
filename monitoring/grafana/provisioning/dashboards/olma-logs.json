@@ -5,6 +5,28 @@
   "version": 1,
   "refresh": "30s",
   "time": { "from": "now-1h", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "log_source",
+        "type": "custom",
+        "label": "Log Source",
+        "query": "olma-backend : container=\"olma-backend\",caddy : job=\"caddy\",syslog : job=\"syslog\"",
+        "current": {
+          "text": "olma-backend",
+          "value": "container=\"olma-backend\""
+        },
+        "options": [
+          { "text": "olma-backend", "value": "container=\"olma-backend\"", "selected": true },
+          { "text": "caddy",        "value": "job=\"caddy\"",              "selected": false },
+          { "text": "syslog",       "value": "job=\"syslog\"",             "selected": false }
+        ],
+        "hide": 0,
+        "includeAll": false,
+        "multi": false
+      }
+    ]
+  },
   "panels": [
     {
       "id": 1,
@@ -14,7 +36,7 @@
       "datasource": { "type": "loki", "uid": "olma-loki" },
       "targets": [
         {
-          "expr": "sum(count_over_time({container=\"olma-backend\"}[$__interval]))",
+          "expr": "sum(count_over_time({$log_source}[$__interval]))",
           "legendFormat": "logs/interval"
         }
       ],
@@ -28,13 +50,13 @@
     },
     {
       "id": 2,
-      "title": "olma-backend Logs",
+      "title": "Logs",
       "type": "logs",
       "gridPos": { "x": 0, "y": 6, "w": 24, "h": 22 },
       "datasource": { "type": "loki", "uid": "olma-loki" },
       "targets": [
         {
-          "expr": "{container=\"olma-backend\"}",
+          "expr": "{$log_source}",
           "legendFormat": ""
         }
       ],
@@ -47,15 +69,5 @@
         "sortOrder": "Descending"
       }
     }
-  ],
-  "templating": {
-    "list": [
-      {
-        "name": "datasource",
-        "type": "datasource",
-        "pluginId": "loki",
-        "hide": 2
-      }
-    ]
-  }
+  ]
 }
