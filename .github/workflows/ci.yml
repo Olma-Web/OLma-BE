@@ -48,7 +48,7 @@ jobs:
           DB_USERNAME: olma
           DB_PASSWORD: olma
 
-  deploy:
+  build:
     needs: test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04-arm
@@ -78,3 +78,25 @@ jobs:
           tags: |
             ${{ env.IMAGE }}:latest
             ${{ env.IMAGE }}:${{ github.sha }}
+
+  deploy:
+    needs: build
+    runs-on: self-hosted
+
+    steps:
+      - name: Pull new image
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker pull ghcr.io/olma-web/olma-backend:latest
+
+      - name: Restart olma-backend
+        run: |
+          docker network create monitoring 2>/dev/null || true
+          docker stop olma-backend && docker rm olma-backend
+          docker run -d \
+            --name olma-backend \
+            --env-file /home/ubuntu/olma.env \
+            --network monitoring \
+            -p 8080:8080 \
+            --restart unless-stopped \
+            ghcr.io/olma-web/olma-backend:latest
