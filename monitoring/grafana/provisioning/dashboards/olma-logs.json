@@ -11,7 +11,7 @@
       "title": "Log Rate",
       "type": "timeseries",
       "gridPos": { "x": 0, "y": 0, "w": 24, "h": 6 },
-      "datasource": { "type": "loki", "uid": "${datasource}" },
+      "datasource": { "type": "loki", "uid": "olma-loki" },
       "targets": [
         {
           "expr": "sum(count_over_time({container=\"olma-backend\"}[$__interval]))",
@@ -31,7 +31,7 @@
       "title": "olma-backend Logs",
       "type": "logs",
       "gridPos": { "x": 0, "y": 6, "w": 24, "h": 22 },
-      "datasource": { "type": "loki", "uid": "${datasource}" },
+      "datasource": { "type": "loki", "uid": "olma-loki" },
       "targets": [
         {
           "expr": "{container=\"olma-backend\"}",
