@@ -23,7 +23,8 @@ public class JwtFilter implements Filter {
     private static final List<String> PERMIT_PREFIXES = List.of(
             "/v1/auth/",
             "/swagger-ui",
-            "/v3/api-docs"
+            "/v3/api-docs",
+            "/actuator"
     );
 
     @Override
