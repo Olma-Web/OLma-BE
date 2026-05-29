@@ -17,6 +17,9 @@ out/
 # Environment
 .env
 
+# Claude Code local settings
+.claude/settings.local.json
+
 # Terraform
 terraform/.terraform/
 terraform/.terraform.lock.hcl

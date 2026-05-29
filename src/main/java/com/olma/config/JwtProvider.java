@@ -42,5 +42,4 @@ public class JwtProvider {
         return Long.parseLong(userId);
     }
 
-
 }

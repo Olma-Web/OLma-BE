@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface SavedEstimateRepository extends JpaRepository<SavedEstimate, Long> {
     List<SavedEstimate> findAllByUser_IdOrderByCreatedAtDesc(Long userId);
+    void deleteAllByUser_Id(Long userId);
 }

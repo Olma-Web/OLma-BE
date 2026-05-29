@@ -2,6 +2,7 @@ package com.olma.service;
 
 import com.olma.config.JwtProvider;
 import com.olma.domain.entity.*;
+import com.olma.domain.enums.SubmissionStatus;
 import com.olma.domain.repository.*;
 import com.olma.dto.AuthLoginRequest;
 import com.olma.dto.AuthLoginResponse;
@@ -26,6 +27,8 @@ public class AuthService {
     private final ExperienceLevelRepository experienceLevelRepository;
     private final JobCategoryRepository jobCategoryRepository;
     private final CertificateTypeRepository certificateTypeRepository;
+    private final RateSubmissionRepository rateSubmissionRepository;
+    private final SavedEstimateRepository savedEstimateRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
 
@@ -80,8 +83,8 @@ public class AuthService {
 
     @Transactional
     public AuthLoginResponse login(AuthLoginRequest request) {
-
-        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new InvalidCredentialsException("Invalid credentials"));
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new InvalidCredentialsException("Invalid credentials"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new InvalidCredentialsException("Invalid credentials");
@@ -92,4 +95,14 @@ public class AuthService {
                 .build();
     }
 
+    @Transactional
+    public void withdraw(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found: id=" + userId));
+
+        rateSubmissionRepository.updateStatusByUserId(userId, SubmissionStatus.HIDDEN);
+        savedEstimateRepository.deleteAllByUser_Id(userId);
+        userCertificateRepository.deleteAllByUser_Id(userId);
+        userRepository.delete(user);
+    }
 }

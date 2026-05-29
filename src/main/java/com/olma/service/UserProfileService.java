@@ -13,11 +13,14 @@ import com.olma.domain.repository.JobCategoryRepository;
 import com.olma.domain.repository.RateSubmissionRepository;
 import com.olma.domain.repository.UserCertificateRepository;
 import com.olma.domain.repository.UserRepository;
+import com.olma.dto.ChangePasswordRequest;
 import com.olma.dto.SubmissionTimelineItem;
 import com.olma.dto.UserProfileResponse;
 import com.olma.dto.UserProfileUpdateRequest;
+import com.olma.exception.InvalidCredentialsException;
 import com.olma.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +31,7 @@ import java.util.List;
 public class UserProfileService {
 
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
     private final ExperienceLevelRepository experienceLevelRepository;
     private final JobCategoryRepository jobCategoryRepository;
     private final CertificateTypeRepository certificateTypeRepository;
@@ -102,6 +106,16 @@ public class UserProfileService {
                                 .build())
                         .toList())
                 .build();
+    }
+
+    @Transactional
+    public void changePassword(Long userId, ChangePasswordRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found: id=" + userId));
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new InvalidCredentialsException("현재 비밀번호가 올바르지 않습니다.");
+        }
+        user.changePassword(passwordEncoder.encode(request.getNewPassword()));
     }
 
     private SubmissionTimelineItem toTimelineItem(RateSubmission s) {

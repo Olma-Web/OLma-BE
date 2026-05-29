@@ -101,6 +101,10 @@ public interface RateSubmissionRepository extends JpaRepository<RateSubmission, 
     );
 
     @Modifying
+    @Query("UPDATE RateSubmission r SET r.status = :status WHERE r.user.id = :userId")
+    void updateStatusByUserId(@Param("userId") Long userId, @Param("status") SubmissionStatus status);
+
+    @Modifying
     @Query(value = """
             WITH percentiles AS (
                 SELECT

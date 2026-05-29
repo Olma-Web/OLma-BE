@@ -4,6 +4,7 @@ import com.olma.domain.entity.ExperienceLevel;
 import com.olma.domain.entity.JobCategory;
 import com.olma.domain.entity.Region;
 import com.olma.domain.entity.WorkType;
+import com.olma.domain.repository.CertificateTypeRepository;
 import com.olma.domain.repository.ExperienceLevelRepository;
 import com.olma.domain.repository.JobCategoryRepository;
 import com.olma.domain.repository.RegionRepository;
@@ -29,6 +30,7 @@ public class ReferenceDataController {
     private final WorkTypeRepository workTypeRepository;
     private final RegionRepository regionRepository;
     private final ExperienceLevelRepository experienceLevelRepository;
+    private final CertificateTypeRepository certificateTypeRepository;
 
     @GetMapping("/job-categories")
     @Transactional(readOnly = true)
@@ -59,6 +61,13 @@ public class ReferenceDataController {
                         "label", el.getLabel(),
                         "minYears", el.getMinYears(),
                         "maxYears", el.getMaxYears()))
+                .toList();
+    }
+
+    @GetMapping("/certificate-types")
+    public List<Map<String, Object>> getCertificateTypes() {
+        return certificateTypeRepository.findAll().stream()
+                .map(ct -> Map.<String, Object>of("id", ct.getId(), "name", ct.getName()))
                 .toList();
     }
 
