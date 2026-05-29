@@ -42,6 +42,7 @@ public interface RateSubmissionRepository extends JpaRepository<RateSubmission, 
                 FROM rate_submissions
                 WHERE status = 'ACTIVE'
                   AND is_outlier = false
+                  AND normalized_monthly IS NOT NULL
                   AND job_category_id = :jobCategoryId
                   AND (:experienceLevelId IS NULL OR experience_level_id = :experienceLevelId)
                   AND (:workFormat IS NULL OR work_format = :workFormat)
@@ -57,6 +58,7 @@ public interface RateSubmissionRepository extends JpaRepository<RateSubmission, 
                 FROM rate_submissions r, bounds b
                 WHERE r.status = 'ACTIVE'
                   AND r.is_outlier = false
+                  AND r.normalized_monthly IS NOT NULL
                   AND r.job_category_id = :jobCategoryId
                   AND (:experienceLevelId IS NULL OR r.experience_level_id = :experienceLevelId)
                   AND (:workFormat IS NULL OR r.work_format = :workFormat)
