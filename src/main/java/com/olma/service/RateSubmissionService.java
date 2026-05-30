@@ -46,6 +46,11 @@ public class RateSubmissionService {
                 .sessionId(request.getSessionId())
                 .build();
 
+        Integer normalized = submission.getNormalizedMonthly();
+        if (normalized != null && (normalized < 10 || normalized > 9999)) {
+            throw new IllegalArgumentException("환산 월 단가는 10~9,999만원 범위여야 합니다.");
+        }
+
         submission = rateSubmissionRepository.save(submission);
         return toResponse(submission);
     }

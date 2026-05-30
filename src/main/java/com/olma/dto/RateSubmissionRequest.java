@@ -3,8 +3,8 @@ package com.olma.dto;
 import com.olma.domain.enums.AmountUnit;
 import com.olma.domain.enums.SubmissionType;
 import com.olma.domain.enums.WorkFormat;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,7 +33,7 @@ public class RateSubmissionRequest {
     private String duration;
 
     @NotNull
-    @PositiveOrZero
+    @Min(10)
     private Integer amount;
 
     @NotNull
