@@ -214,6 +214,11 @@ resource "aws_instance" "backend" {
     apt-get install -y caddy
 
     cat > /etc/caddy/Caddyfile << 'CADDYEOF'
+    docs.olma.kro.kr {
+      root * /var/www/docs
+      file_server
+    }
+
     :80 {
       reverse_proxy localhost:8080
     }
