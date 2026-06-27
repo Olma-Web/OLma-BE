@@ -5,6 +5,7 @@ import com.olma.exception.DuplicateValueException;
 import com.olma.exception.InvalidCredentialsException;
 import com.olma.exception.NotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -20,36 +21,43 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.time.OffsetDateTime;
 import java.util.List;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex, HttpServletRequest req) {
+        log.warn("Conflict. path={} message={}", req.getRequestURI(), ex.getMessage());
         return build(HttpStatus.CONFLICT, "Duplicate value", req.getRequestURI(), null);
     }
 
     @ExceptionHandler(DuplicateValueException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateValue(DuplicateValueException ex, HttpServletRequest req) {
+        log.warn("Conflict. path={} message={}", req.getRequestURI(), ex.getMessage());
         return build(HttpStatus.CONFLICT, ex.getMessage(), req.getRequestURI(), null);
     }
 
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleInvalidCredential(InvalidCredentialsException ex, HttpServletRequest req) {
+        log.warn("Unauthorized. path={} message={}", req.getRequestURI(), ex.getMessage());
         return build(HttpStatus.UNAUTHORIZED, ex.getMessage(), req.getRequestURI(), null);
     }
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFound(NotFoundException ex, HttpServletRequest req) {
+        log.warn("Not found. path={} message={}", req.getRequestURI(), ex.getMessage());
         return build(HttpStatus.NOT_FOUND, ex.getMessage(), req.getRequestURI(), null);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest req) {
+        log.warn("Bad request. path={} message={}", req.getRequestURI(), ex.getMessage());
         return build(HttpStatus.BAD_REQUEST, ex.getMessage(), req.getRequestURI(), null);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAll(Exception ex, HttpServletRequest req) {
+        log.error("Unhandled exception occurred. path={}", req.getRequestURI(), ex);
         return build(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), req.getRequestURI(), null);
     }
 

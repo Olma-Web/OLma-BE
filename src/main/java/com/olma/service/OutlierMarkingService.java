@@ -19,7 +19,13 @@ public class OutlierMarkingService {
     @Scheduled(cron = "0 0 4 * * *", zone = "Asia/Seoul")
     @Transactional
     public void markOutliersDaily() {
-        int affected = rateSubmissionRepository.markOutliers(MIN_GROUP_SIZE);
-        log.info("Outlier marking pass complete. Rows touched: {}", affected);
+        log.info("outlier marking started");
+        try {
+            int affected = rateSubmissionRepository.markOutliers(MIN_GROUP_SIZE);
+            log.info("outlier marking completed rowsTouched={}", affected);
+        } catch (Exception ex) {
+            log.error("outlier marking failed", ex);
+            throw ex;
+        }
     }
 }

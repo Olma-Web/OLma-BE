@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.MDC;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @Component
+@Order(2)
 @RequiredArgsConstructor
 public class JwtFilter implements Filter {
 
@@ -59,11 +61,7 @@ public class JwtFilter implements Filter {
             return;
         }
 
-        try {
-            chain.doFilter(req, res);
-        } finally {
-            MDC.remove("userId");
-        }
+        chain.doFilter(req, res);
     }
 
     private void writeErrorResponse(HttpServletResponse response, HttpServletRequest request, int status, String message) throws IOException {

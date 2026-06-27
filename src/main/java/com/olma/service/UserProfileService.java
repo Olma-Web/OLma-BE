@@ -20,12 +20,14 @@ import com.olma.dto.UserProfileUpdateRequest;
 import com.olma.exception.InvalidCredentialsException;
 import com.olma.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserProfileService {
@@ -75,6 +77,7 @@ public class UserProfileService {
             userCertificateRepository.saveAll(newCerts);
         }
 
+        log.info("user profile updated userId={}", userId);
         return toResponse(user, newCerts);
     }
 
@@ -116,6 +119,7 @@ public class UserProfileService {
             throw new InvalidCredentialsException("현재 비밀번호가 올바르지 않습니다.");
         }
         user.changePassword(passwordEncoder.encode(request.getNewPassword()));
+        log.info("password changed userId={}", userId);
     }
 
     private SubmissionTimelineItem toTimelineItem(RateSubmission s) {

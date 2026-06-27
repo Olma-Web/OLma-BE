@@ -16,6 +16,7 @@ import com.olma.dto.EstimateCalculateResponse;
 import com.olma.dto.SavedEstimateResponse;
 import com.olma.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EstimateService {
@@ -100,6 +102,7 @@ public class EstimateService {
                     .finalAmount(finalAmount)
                     .build());
             savedEstimateId = saved.getId();
+            log.info("estimate saved estimateId={} userId={}", savedEstimateId, user.getId());
         }
 
         return EstimateCalculateResponse.builder()

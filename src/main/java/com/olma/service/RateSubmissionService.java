@@ -12,9 +12,11 @@ import com.olma.dto.RateSubmissionRequest;
 import com.olma.dto.RateSubmissionResponse;
 import com.olma.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RateSubmissionService {
@@ -52,6 +54,7 @@ public class RateSubmissionService {
         }
 
         submission = rateSubmissionRepository.save(submission);
+        log.info("rate submission created submissionId={} userId={}", submission.getId(), request.getUserId());
         return toResponse(submission);
     }
 

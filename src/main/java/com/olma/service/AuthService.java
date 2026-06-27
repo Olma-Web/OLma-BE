@@ -12,12 +12,14 @@ import com.olma.exception.DuplicateValueException;
 import com.olma.exception.InvalidCredentialsException;
 import com.olma.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -72,6 +74,7 @@ public class AuthService {
             userCertificateRepository.saveAll(certificates);
         }
 
+        log.info("user signed up userId={}", user.getId());
         return AuthSignupResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
@@ -83,10 +86,9 @@ public class AuthService {
 
     @Transactional
     public AuthLoginResponse login(AuthLoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new InvalidCredentialsException("Invalid credentials"));
-
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        User user = userRepository.findByEmail(request.getEmail()).orElse(null);
+        if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            log.warn("login failed reason=INVALID_CREDENTIALS");
             throw new InvalidCredentialsException("Invalid credentials");
         }
         return AuthLoginResponse.builder()
