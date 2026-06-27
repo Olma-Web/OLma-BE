@@ -145,7 +145,7 @@ if (normalized != null && (normalized < 10 || normalized > 9999)) {
 
 ---
 
-## GET /v1/submissions/{id}
+## GET /v1/submissions/\{id\}
 
 단가 제보를 단건 조회한다.
 
@@ -176,7 +176,7 @@ Authorization: Bearer <JWT>
 
 ---
 
-## DELETE /v1/submissions/{id}
+## DELETE /v1/submissions/\{id\}
 
 단가 제보를 숨김 처리한다. 물리 삭제가 아닌 소프트 삭제다 (`status = HIDDEN`).
 
