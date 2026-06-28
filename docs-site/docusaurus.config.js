@@ -65,7 +65,6 @@ const config = {
       },
       footer: {
         style: 'dark',
-        copyright: `Copyright © ${new Date().getFullYear()} OLma. Built with Docusaurus.`,
       },
       prism: {
         theme: prismThemes.github,
