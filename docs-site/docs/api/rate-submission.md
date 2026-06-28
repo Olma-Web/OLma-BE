@@ -1,4 +1,5 @@
 ---
+slug: /
 sidebar_position: 1
 title: 단가 제출 API
 description: POST /v1/submissions 엔드포인트 명세 및 검증 규칙
