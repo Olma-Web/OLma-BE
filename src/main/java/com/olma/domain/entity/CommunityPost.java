@@ -1,0 +1,98 @@
+package com.olma.domain.entity;
+
+import com.olma.domain.enums.CommunityCategory;
+import com.olma.domain.enums.CommunityContentStatus;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "community_posts")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class CommunityPost {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User author;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private CommunityCategory category;
+
+    @Column(nullable = false, length = 120)
+    private String title;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String content;
+
+    @Column(nullable = false)
+    private Integer likeCount = 0;
+
+    @Column(nullable = false)
+    private Integer commentCount = 0;
+
+    @Column(nullable = false)
+    private Integer reportCount = 0;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    private CommunityContentStatus status = CommunityContentStatus.ACTIVE;
+
+    @Column(nullable = false, updatable = false)
+    private OffsetDateTime createdAt = OffsetDateTime.now();
+
+    @Column(nullable = false)
+    private OffsetDateTime updatedAt = OffsetDateTime.now();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("sortOrder ASC")
+    private List<CommunityPostImage> images = new ArrayList<>();
+
+    @Builder
+    public CommunityPost(User author, CommunityCategory category, String title, String content) {
+        this.author = author;
+        this.category = category;
+        this.title = title;
+        this.content = content;
+    }
+
+    public void addImage(String imageUrl, int sortOrder) {
+        images.add(CommunityPostImage.builder()
+                .post(this)
+                .imageUrl(imageUrl)
+                .sortOrder(sortOrder)
+                .build());
+    }
+
+    public void increaseLikeCount() {
+        this.likeCount += 1;
+    }
+
+    public void decreaseLikeCount() {
+        this.likeCount = Math.max(0, this.likeCount - 1);
+    }
+
+    public void increaseCommentCount() {
+        this.commentCount += 1;
+    }
+
+    public void increaseReportCount() {
+        this.reportCount += 1;
+    }
+
+    public void hide() {
+        this.status = CommunityContentStatus.HIDDEN;
+        this.updatedAt = OffsetDateTime.now();
+    }
+}
