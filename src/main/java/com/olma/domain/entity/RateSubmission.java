@@ -13,6 +13,8 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 @Entity
@@ -20,6 +22,9 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RateSubmission {
+
+    private static final ZoneId KST = ZoneId.of("Asia/Seoul");
+    private static final DateTimeFormatter PROJECT_DATE_FORMATTER = DateTimeFormatter.ofPattern("yy.MM.dd");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -73,10 +78,13 @@ public class RateSubmission {
     @Column(nullable = false, updatable = false)
     private OffsetDateTime createdAt = OffsetDateTime.now();
 
+    @Column(name = "project_name", nullable = false, length = 100)
+    private String projectName;
+
     @Builder
     public RateSubmission(JobCategory jobCategory, ExperienceLevel experienceLevel, User user,
                           SubmissionType submissionType, WorkFormat workFormat, String duration,
-                          Integer amount, AmountUnit amountUnit, UUID sessionId) {
+                          Integer amount, AmountUnit amountUnit, UUID sessionId, String projectName) {
         this.jobCategory = jobCategory;
         this.experienceLevel = experienceLevel;
         this.user = user;
@@ -87,6 +95,7 @@ public class RateSubmission {
         this.amountUnit = amountUnit;
         this.sessionId = sessionId;
         this.normalizedMonthly = calculateNormalizedMonthly();
+        this.projectName = normalizeProjectName(projectName);
     }
 
     private Integer calculateNormalizedMonthly() {
@@ -126,5 +135,16 @@ public class RateSubmission {
 
     public void hide() {
         this.status = SubmissionStatus.HIDDEN;
+    }
+
+    public void updateProjectName(String projectName) {
+        this.projectName = normalizeProjectName(projectName);
+    }
+
+    private String normalizeProjectName(String value) {
+        if (value != null && !value.isBlank()) {
+            return value.trim();
+        }
+        return createdAt.atZoneSameInstant(KST).format(PROJECT_DATE_FORMATTER) + " 단가 기록";
     }
 }

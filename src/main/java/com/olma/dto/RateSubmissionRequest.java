@@ -41,4 +41,7 @@ public class RateSubmissionRequest {
 
     @NotNull
     private UUID sessionId;
+
+    @Size(max = 100)
+    private String projectName;
 }

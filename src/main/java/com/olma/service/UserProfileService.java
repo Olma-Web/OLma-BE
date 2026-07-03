@@ -125,6 +125,7 @@ public class UserProfileService {
     private SubmissionTimelineItem toTimelineItem(RateSubmission s) {
         return SubmissionTimelineItem.builder()
                 .id(s.getId())
+                .projectName(s.getProjectName())
                 .submissionType(s.getSubmissionType())
                 .workFormat(s.getWorkFormat())
                 .duration(s.getDuration())

@@ -2,6 +2,7 @@ package com.olma.controller;
 
 import com.olma.dto.EstimateCalculateRequest;
 import com.olma.dto.EstimateCalculateResponse;
+import com.olma.dto.ProjectNameUpdateRequest;
 import com.olma.dto.SavedEstimateResponse;
 import com.olma.service.EstimateService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -38,6 +39,14 @@ public class EstimateController {
     public List<SavedEstimateResponse> getMyEstimates(HttpServletRequest httpRequest) {
         Long userId = (Long) httpRequest.getAttribute("userId");
         return estimateService.getMyEstimates(userId);
+    }
+
+    @PatchMapping("/{id}/project-name")
+    public SavedEstimateResponse updateProjectName(@PathVariable Long id,
+                                                   @Valid @RequestBody ProjectNameUpdateRequest request,
+                                                   HttpServletRequest httpRequest) {
+        Long userId = (Long) httpRequest.getAttribute("userId");
+        return estimateService.updateProjectName(userId, id, request);
     }
 
     @DeleteMapping("/{id}")

@@ -11,6 +11,7 @@ import java.util.List;
 @Builder
 public class EstimateCalculateResponse {
     private Long savedEstimateId;
+    private String projectName;
     private String experienceLevelLabel;
     private String jobCategoryName;
     private Integer baseDailyRate;

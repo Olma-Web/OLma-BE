@@ -12,6 +12,7 @@ import java.time.OffsetDateTime;
 @Builder
 public class SubmissionTimelineItem {
     private Long id;
+    private String projectName;
     private SubmissionType submissionType;
     private WorkFormat workFormat;
     private String duration;

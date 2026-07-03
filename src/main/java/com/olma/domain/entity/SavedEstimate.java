@@ -10,6 +10,8 @@ import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +20,9 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SavedEstimate {
+
+    private static final ZoneId KST = ZoneId.of("Asia/Seoul");
+    private static final DateTimeFormatter PROJECT_DATE_FORMATTER = DateTimeFormatter.ofPattern("yy.MM.dd");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -60,11 +65,15 @@ public class SavedEstimate {
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt = OffsetDateTime.now();
 
+    @Column(name = "project_name", nullable = false, length = 100)
+    private String projectName;
+
     @Builder
     public SavedEstimate(User user, ExperienceLevel experienceLevel, JobCategory jobCategory,
                          Integer baseAmount, Integer screenCount,
                          BigDecimal uxMultiplier, BigDecimal platformMultiplier,
-                         List<String> addons, Integer addonPercent, Integer finalAmount) {
+                         List<String> addons, Integer addonPercent, Integer finalAmount,
+                         String projectName) {
         this.user = user;
         this.experienceLevel = experienceLevel;
         this.jobCategory = jobCategory;
@@ -75,5 +84,17 @@ public class SavedEstimate {
         this.addons = addons != null ? addons : new ArrayList<>();
         this.addonPercent = addonPercent != null ? addonPercent : 0;
         this.finalAmount = finalAmount;
+        this.projectName = normalizeProjectName(projectName);
+    }
+
+    public void updateProjectName(String projectName) {
+        this.projectName = normalizeProjectName(projectName);
+    }
+
+    private String normalizeProjectName(String value) {
+        if (value != null && !value.isBlank()) {
+            return value.trim();
+        }
+        return createdAt.atZoneSameInstant(KST).format(PROJECT_DATE_FORMATTER) + " 견적서";
     }
 }

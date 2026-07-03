@@ -12,6 +12,7 @@ import java.time.OffsetDateTime;
 @Builder
 public class RateSubmissionResponse {
     private Long id;
+    private String projectName;
     private String jobCategoryName;
     private String experienceLevelLabel;
     private SubmissionType submissionType;

@@ -13,6 +13,7 @@ import com.olma.domain.repository.SavedEstimateRepository;
 import com.olma.domain.repository.UserRepository;
 import com.olma.dto.EstimateCalculateRequest;
 import com.olma.dto.EstimateCalculateResponse;
+import com.olma.dto.ProjectNameUpdateRequest;
 import com.olma.dto.SavedEstimateResponse;
 import com.olma.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -100,6 +101,7 @@ public class EstimateService {
                     .addons(addonNames)
                     .addonPercent(addonPercent)
                     .finalAmount(finalAmount)
+                    .projectName(request.getProjectName())
                     .build());
             savedEstimateId = saved.getId();
             log.info("estimate saved estimateId={} userId={}", savedEstimateId, user.getId());
@@ -107,6 +109,7 @@ public class EstimateService {
 
         return EstimateCalculateResponse.builder()
                 .savedEstimateId(savedEstimateId)
+                .projectName(saved != null ? saved.getProjectName() : null)
                 .experienceLevelLabel(experienceLevel.getLabel())
                 .jobCategoryName(jobCategory.getName())
                 .baseDailyRate(baseDailyRate)
@@ -145,9 +148,22 @@ public class EstimateService {
         savedEstimateRepository.delete(estimate);
     }
 
+    @Transactional
+    public SavedEstimateResponse updateProjectName(Long userId, Long estimateId, ProjectNameUpdateRequest request) {
+        SavedEstimate estimate = savedEstimateRepository.findById(estimateId)
+                .orElseThrow(() -> new NotFoundException("Estimate not found: id=" + estimateId));
+        if (!estimate.getUser().getId().equals(userId)) {
+            throw new NotFoundException("Estimate not found: id=" + estimateId);
+        }
+        estimate.updateProjectName(request.getProjectName());
+        log.info("estimate project name updated estimateId={} userId={}", estimateId, userId);
+        return toSavedResponse(estimate);
+    }
+
     private SavedEstimateResponse toSavedResponse(SavedEstimate e) {
         return SavedEstimateResponse.builder()
                 .id(e.getId())
+                .projectName(e.getProjectName())
                 .experienceLevelLabel(e.getExperienceLevel().getLabel())
                 .jobCategoryName(e.getJobCategory().getName())
                 .screenCount(e.getScreenCount())

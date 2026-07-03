@@ -8,6 +8,7 @@ import com.olma.domain.repository.ExperienceLevelRepository;
 import com.olma.domain.repository.JobCategoryRepository;
 import com.olma.domain.repository.RateSubmissionRepository;
 import com.olma.domain.repository.UserRepository;
+import com.olma.dto.ProjectNameUpdateRequest;
 import com.olma.dto.RateSubmissionRequest;
 import com.olma.dto.RateSubmissionResponse;
 import com.olma.exception.NotFoundException;
@@ -46,6 +47,7 @@ public class RateSubmissionService {
                 .amount(request.getAmount())
                 .amountUnit(request.getAmountUnit())
                 .sessionId(request.getSessionId())
+                .projectName(request.getProjectName())
                 .build();
 
         Integer normalized = submission.getNormalizedMonthly();
@@ -72,9 +74,22 @@ public class RateSubmissionService {
         submission.hide();
     }
 
+    @Transactional
+    public RateSubmissionResponse updateProjectName(Long userId, Long submissionId, ProjectNameUpdateRequest request) {
+        RateSubmission submission = rateSubmissionRepository.findById(submissionId)
+                .orElseThrow(() -> new NotFoundException("Submission not found: id=" + submissionId));
+        if (submission.getUser() == null || !submission.getUser().getId().equals(userId)) {
+            throw new NotFoundException("Submission not found: id=" + submissionId);
+        }
+        submission.updateProjectName(request.getProjectName());
+        log.info("rate submission project name updated submissionId={} userId={}", submissionId, userId);
+        return toResponse(submission);
+    }
+
     private RateSubmissionResponse toResponse(RateSubmission s) {
         return RateSubmissionResponse.builder()
                 .id(s.getId())
+                .projectName(s.getProjectName())
                 .jobCategoryName(s.getJobCategory().getName())
                 .experienceLevelLabel(s.getExperienceLevel().getLabel())
                 .submissionType(s.getSubmissionType())

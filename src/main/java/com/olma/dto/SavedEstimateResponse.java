@@ -11,6 +11,7 @@ import java.util.List;
 @Builder
 public class SavedEstimateResponse {
     private Long id;
+    private String projectName;
     private String experienceLevelLabel;
     private String jobCategoryName;
     private Integer screenCount;
