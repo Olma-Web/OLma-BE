@@ -2,6 +2,7 @@ package com.olma.controller;
 
 import com.olma.dto.ErrorResponse;
 import com.olma.exception.DuplicateValueException;
+import com.olma.exception.ForbiddenException;
 import com.olma.exception.InvalidCredentialsException;
 import com.olma.exception.NotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -47,6 +48,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ErrorResponse> handleNotFound(NotFoundException ex, HttpServletRequest req) {
         log.warn("Not found. path={} message={}", req.getRequestURI(), ex.getMessage());
         return build(HttpStatus.NOT_FOUND, ex.getMessage(), req.getRequestURI(), null);
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ErrorResponse> handleForbidden(ForbiddenException ex, HttpServletRequest req) {
+        log.warn("Forbidden. path={} message={}", req.getRequestURI(), ex.getMessage());
+        return build(HttpStatus.FORBIDDEN, ex.getMessage(), req.getRequestURI(), null);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

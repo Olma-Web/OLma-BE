@@ -56,6 +56,10 @@ public class CommunityComment {
         this.reportCount += 1;
     }
 
+    public void update(String content) {
+        this.content = content;
+    }
+
     public void hide() {
         this.status = CommunityContentStatus.HIDDEN;
     }

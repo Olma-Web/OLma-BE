@@ -5,6 +5,7 @@ import com.olma.domain.enums.CommunityCategory;
 import com.olma.domain.enums.CommunityContentStatus;
 import com.olma.domain.repository.*;
 import com.olma.dto.*;
+import com.olma.exception.ForbiddenException;
 import com.olma.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -94,6 +95,32 @@ public class CommunityService {
     }
 
     @Transactional
+    public CommunityPostDetailResponse updatePost(Long postId, Long userId, CommunityPostUpdateRequest request) {
+        CommunityPost post = getActivePost(postId);
+        validateAuthor(post.getAuthor().getId(), userId);
+        List<String> imageUrls = request.getImageUrls() == null ? List.of() : request.getImageUrls();
+        if (imageUrls.size() > 3) {
+            throw new IllegalArgumentException("이미지는 최대 3장까지 첨부할 수 있습니다.");
+        }
+
+        post.update(request.getCategory(), request.getTitle(), request.getContent(), imageUrls);
+        boolean likedByMe = communityPostLikeRepository.findByPost_IdAndUser_Id(postId, userId).isPresent();
+        List<CommunityCommentResponse> comments = buildCommentTree(
+                communityCommentRepository.findAllByPost_IdAndStatusOrderByCreatedAtAsc(postId, CommunityContentStatus.ACTIVE)
+        );
+        log.info("community post updated postId={} userId={}", postId, userId);
+        return toDetailResponse(post, likedByMe, comments);
+    }
+
+    @Transactional
+    public void deletePost(Long postId, Long userId) {
+        CommunityPost post = getActivePost(postId);
+        validateAuthor(post.getAuthor().getId(), userId);
+        post.hide();
+        log.info("community post deleted postId={} userId={}", postId, userId);
+    }
+
+    @Transactional
     public void likePost(Long postId, Long userId) {
         CommunityPost post = getActivePost(postId);
         User user = getUser(userId);
@@ -145,6 +172,34 @@ public class CommunityService {
     }
 
     @Transactional
+    public CommunityCommentResponse updateComment(Long commentId, Long userId, CommunityCommentUpdateRequest request) {
+        CommunityComment comment = getActiveComment(commentId);
+        validateAuthor(comment.getAuthor().getId(), userId);
+        comment.update(request.getContent());
+        log.info("community comment updated commentId={} userId={}", commentId, userId);
+        return toCommentResponse(comment, List.of());
+    }
+
+    @Transactional
+    public void deleteComment(Long commentId, Long userId) {
+        CommunityComment comment = getActiveComment(commentId);
+        validateAuthor(comment.getAuthor().getId(), userId);
+
+        int hiddenCount = 1;
+        comment.hide();
+        if (comment.getParentComment() == null) {
+            List<CommunityComment> replies = communityCommentRepository.findAllByParentComment_IdAndStatus(
+                    commentId,
+                    CommunityContentStatus.ACTIVE
+            );
+            replies.forEach(CommunityComment::hide);
+            hiddenCount += replies.size();
+        }
+        comment.getPost().decreaseCommentCount(hiddenCount);
+        log.info("community comment deleted commentId={} userId={} hiddenCount={}", commentId, userId, hiddenCount);
+    }
+
+    @Transactional
     public void reportPost(Long postId, Long userId, CommunityReportRequest request) {
         CommunityPost post = getActivePost(postId);
         User reporter = getUser(userId);
@@ -186,6 +241,18 @@ public class CommunityService {
     private CommunityPost getActivePost(Long postId) {
         return communityPostRepository.findActiveByIdWithAuthor(postId, CommunityContentStatus.ACTIVE)
                 .orElseThrow(() -> new NotFoundException("Post not found: id=" + postId));
+    }
+
+    private CommunityComment getActiveComment(Long commentId) {
+        return communityCommentRepository.findById(commentId)
+                .filter(comment -> comment.getStatus() == CommunityContentStatus.ACTIVE)
+                .orElseThrow(() -> new NotFoundException("Comment not found: id=" + commentId));
+    }
+
+    private void validateAuthor(Long authorId, Long userId) {
+        if (!Objects.equals(authorId, userId)) {
+            throw new ForbiddenException("작성자만 수정하거나 삭제할 수 있습니다.");
+        }
     }
 
     private CommunityPostSummaryResponse toSummaryResponse(CommunityPost post, boolean best) {

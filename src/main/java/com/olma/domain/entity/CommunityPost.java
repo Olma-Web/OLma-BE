@@ -75,6 +75,17 @@ public class CommunityPost {
                 .build());
     }
 
+    public void update(CommunityCategory category, String title, String content, List<String> imageUrls) {
+        this.category = category;
+        this.title = title;
+        this.content = content;
+        this.images.clear();
+        for (int i = 0; i < imageUrls.size(); i++) {
+            addImage(imageUrls.get(i), i);
+        }
+        this.updatedAt = OffsetDateTime.now();
+    }
+
     public void increaseLikeCount() {
         this.likeCount += 1;
     }
@@ -85,6 +96,10 @@ public class CommunityPost {
 
     public void increaseCommentCount() {
         this.commentCount += 1;
+    }
+
+    public void decreaseCommentCount(int count) {
+        this.commentCount = Math.max(0, this.commentCount - count);
     }
 
     public void increaseReportCount() {

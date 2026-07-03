@@ -40,6 +40,21 @@ public class CommunityController {
         return communityService.getPost(postId, userId);
     }
 
+    @PutMapping("/posts/{postId}")
+    public CommunityPostDetailResponse updatePost(@PathVariable Long postId,
+                                                  @Valid @RequestBody CommunityPostUpdateRequest request,
+                                                  HttpServletRequest httpRequest) {
+        Long userId = (Long) httpRequest.getAttribute("userId");
+        return communityService.updatePost(postId, userId, request);
+    }
+
+    @DeleteMapping("/posts/{postId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletePost(@PathVariable Long postId, HttpServletRequest httpRequest) {
+        Long userId = (Long) httpRequest.getAttribute("userId");
+        communityService.deletePost(postId, userId);
+    }
+
     @PostMapping("/posts/{postId}/likes")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void likePost(@PathVariable Long postId, HttpServletRequest httpRequest) {
@@ -61,6 +76,21 @@ public class CommunityController {
                                                   HttpServletRequest httpRequest) {
         Long userId = (Long) httpRequest.getAttribute("userId");
         return communityService.createComment(postId, userId, request);
+    }
+
+    @PutMapping("/comments/{commentId}")
+    public CommunityCommentResponse updateComment(@PathVariable Long commentId,
+                                                  @Valid @RequestBody CommunityCommentUpdateRequest request,
+                                                  HttpServletRequest httpRequest) {
+        Long userId = (Long) httpRequest.getAttribute("userId");
+        return communityService.updateComment(commentId, userId, request);
+    }
+
+    @DeleteMapping("/comments/{commentId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteComment(@PathVariable Long commentId, HttpServletRequest httpRequest) {
+        Long userId = (Long) httpRequest.getAttribute("userId");
+        communityService.deleteComment(commentId, userId);
     }
 
     @PostMapping("/posts/{postId}/reports")

@@ -9,4 +9,6 @@ import java.util.List;
 public interface CommunityCommentRepository extends JpaRepository<CommunityComment, Long> {
 
     List<CommunityComment> findAllByPost_IdAndStatusOrderByCreatedAtAsc(Long postId, CommunityContentStatus status);
+
+    List<CommunityComment> findAllByParentComment_IdAndStatus(Long parentCommentId, CommunityContentStatus status);
 }
