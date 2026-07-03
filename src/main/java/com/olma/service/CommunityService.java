@@ -60,6 +60,53 @@ public class CommunityService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
+    public CommunityPostPageResponse getMyPosts(Long userId, int page, int size) {
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("User not found: id=" + userId);
+        }
+        PageRequest pageRequest = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), MAX_PAGE_SIZE));
+        Page<CommunityPost> posts = communityPostRepository.findAllByAuthor_IdAndStatusOrderByCreatedAtDesc(
+                userId,
+                CommunityContentStatus.ACTIVE,
+                pageRequest
+        );
+
+        return CommunityPostPageResponse.builder()
+                .posts(posts.getContent().stream()
+                        .map(post -> toSummaryResponse(post, false))
+                        .toList())
+                .page(posts.getNumber())
+                .size(posts.getSize())
+                .totalElements(posts.getTotalElements())
+                .totalPages(posts.getTotalPages())
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public CommunityCommentListResponse getMyComments(Long userId, int page, int size) {
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("User not found: id=" + userId);
+        }
+        PageRequest pageRequest = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), MAX_PAGE_SIZE));
+        Page<CommunityComment> comments = communityCommentRepository.findMyActiveComments(
+                userId,
+                CommunityContentStatus.ACTIVE,
+                CommunityContentStatus.ACTIVE,
+                pageRequest
+        );
+
+        return CommunityCommentListResponse.builder()
+                .comments(comments.getContent().stream()
+                        .map(this::toMyCommentResponse)
+                        .toList())
+                .page(comments.getNumber())
+                .size(comments.getSize())
+                .totalElements(comments.getTotalElements())
+                .totalPages(comments.getTotalPages())
+                .build();
+    }
+
     @Transactional
     public CommunityPostDetailResponse createPost(Long userId, CommunityPostCreateRequest request) {
         User author = getUser(userId);
@@ -315,6 +362,19 @@ public class CommunityService {
                 .author(toAuthorResponse(comment.getAuthor()))
                 .createdAt(comment.getCreatedAt())
                 .replies(replies)
+                .build();
+    }
+
+    private CommunityMyCommentResponse toMyCommentResponse(CommunityComment comment) {
+        CommunityPost post = comment.getPost();
+        return CommunityMyCommentResponse.builder()
+                .id(comment.getId())
+                .postId(post.getId())
+                .postTitle(post.getTitle())
+                .postCategory(post.getCategory())
+                .parentCommentId(comment.getParentComment() != null ? comment.getParentComment().getId() : null)
+                .content(comment.getContent())
+                .createdAt(comment.getCreatedAt())
                 .build();
     }
 

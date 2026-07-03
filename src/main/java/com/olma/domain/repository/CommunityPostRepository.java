@@ -23,6 +23,12 @@ public interface CommunityPostRepository extends JpaRepository<CommunityPost, Lo
             Pageable pageable
     );
 
+    Page<CommunityPost> findAllByAuthor_IdAndStatusOrderByCreatedAtDesc(
+            Long authorId,
+            CommunityContentStatus status,
+            Pageable pageable
+    );
+
     @Query("""
             SELECT p
             FROM CommunityPost p

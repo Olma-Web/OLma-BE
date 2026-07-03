@@ -25,6 +25,22 @@ public class CommunityController {
         return communityService.getPosts(category, page, size);
     }
 
+    @GetMapping("/me/posts")
+    public CommunityPostPageResponse getMyPosts(@RequestParam(defaultValue = "0") int page,
+                                                @RequestParam(defaultValue = "20") int size,
+                                                HttpServletRequest httpRequest) {
+        Long userId = (Long) httpRequest.getAttribute("userId");
+        return communityService.getMyPosts(userId, page, size);
+    }
+
+    @GetMapping("/me/comments")
+    public CommunityCommentListResponse getMyComments(@RequestParam(defaultValue = "0") int page,
+                                                      @RequestParam(defaultValue = "20") int size,
+                                                      HttpServletRequest httpRequest) {
+        Long userId = (Long) httpRequest.getAttribute("userId");
+        return communityService.getMyComments(userId, page, size);
+    }
+
     @PostMapping("/posts")
     @ResponseStatus(HttpStatus.CREATED)
     public CommunityPostDetailResponse createPost(@Valid @RequestBody CommunityPostCreateRequest request,
