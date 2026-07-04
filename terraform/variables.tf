@@ -63,3 +63,12 @@ variable "jwt_secret" {
   type        = string
   sensitive   = true
 }
+
+# ---- Monitoring ----
+
+variable "discord_webhook_url" {
+  description = "Discord webhook URL for Grafana alert notifications"
+  type        = string
+  sensitive   = true
+  default     = "https://discord.com/api/webhooks/WEBHOOK_ID/WEBHOOK_TOKEN"
+}

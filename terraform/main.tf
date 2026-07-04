@@ -195,6 +195,16 @@ resource "aws_instance" "backend" {
     JWT_SECRET=${var.jwt_secret}
     ENVEOF
     sed -i 's/^    //' /home/ubuntu/olma.env
+    chmod 600 /home/ubuntu/olma.env
+    chown ubuntu:ubuntu /home/ubuntu/olma.env
+
+    # Monitoring Env file
+    cat > /home/ubuntu/monitoring.env << 'ENVEOF'
+    DISCORD_WEBHOOK_URL=${var.discord_webhook_url}
+    ENVEOF
+    sed -i 's/^    //' /home/ubuntu/monitoring.env
+    chmod 600 /home/ubuntu/monitoring.env
+    chown ubuntu:ubuntu /home/ubuntu/monitoring.env
 
     # Caddy (reverse proxy + auto HTTPS)
     apt-get install -y debian-keyring debian-archive-keyring apt-transport-https curl

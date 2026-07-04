@@ -18,6 +18,18 @@ jobs:
           docker network create monitoring 2>/dev/null || true
           docker network connect monitoring olma-backend 2>/dev/null || true
 
+      - name: Ensure monitoring environment file
+        run: |
+          if [ ! -f /home/ubuntu/monitoring.env ]; then
+            cat > /home/ubuntu/monitoring.env << 'EOF'
+          DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/WEBHOOK_ID/WEBHOOK_TOKEN
+          EOF
+            sed -i 's/^          //' /home/ubuntu/monitoring.env
+            chmod 600 /home/ubuntu/monitoring.env
+          fi
+
       - name: Deploy monitoring stack
         working-directory: monitoring
-        run: docker compose up -d --remove-orphans
+        run: |
+          docker compose up -d --remove-orphans
+          docker compose restart grafana
