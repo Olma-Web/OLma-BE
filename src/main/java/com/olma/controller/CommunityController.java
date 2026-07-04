@@ -85,6 +85,20 @@ public class CommunityController {
         communityService.unlikePost(postId, userId);
     }
 
+    @PostMapping("/comments/{commentId}/likes")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void likeComment(@PathVariable Long commentId, HttpServletRequest httpRequest) {
+        Long userId = (Long) httpRequest.getAttribute("userId");
+        communityService.likeComment(commentId, userId);
+    }
+
+    @DeleteMapping("/comments/{commentId}/likes")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void unlikeComment(@PathVariable Long commentId, HttpServletRequest httpRequest) {
+        Long userId = (Long) httpRequest.getAttribute("userId");
+        communityService.unlikeComment(commentId, userId);
+    }
+
     @PostMapping("/posts/{postId}/comments")
     @ResponseStatus(HttpStatus.CREATED)
     public CommunityCommentResponse createComment(@PathVariable Long postId,

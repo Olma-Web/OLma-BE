@@ -35,6 +35,9 @@ public class CommunityComment {
     private String content;
 
     @Column(nullable = false)
+    private Integer likeCount = 0;
+
+    @Column(nullable = false)
     private Integer reportCount = 0;
 
     @Enumerated(EnumType.STRING)
@@ -50,6 +53,14 @@ public class CommunityComment {
         this.author = author;
         this.parentComment = parentComment;
         this.content = content;
+    }
+
+    public void increaseLikeCount() {
+        this.likeCount += 1;
+    }
+
+    public void decreaseLikeCount() {
+        this.likeCount = Math.max(0, this.likeCount - 1);
     }
 
     public void increaseReportCount() {
