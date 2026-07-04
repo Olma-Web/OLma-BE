@@ -4,14 +4,25 @@
   "schemaVersion": 38,
   "version": 1,
   "refresh": "10s",
-  "time": { "from": "now-3h", "to": "now" },
+  "time": {
+    "from": "now-3h",
+    "to": "now"
+  },
   "panels": [
     {
       "id": 1,
       "title": "Total API Requests",
       "type": "stat",
-      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
-      "datasource": { "type": "loki", "uid": "olma-loki" },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "olma-loki"
+      },
       "targets": [
         {
           "expr": "sum(count_over_time({container=\"olma-backend\"} |= \"request completed\" |~ \"path=/v1/\" [$__range]))",
@@ -23,12 +34,21 @@
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "textMode": "auto"
       },
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "fixed", "fixedColor": "blue" },
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
           "decimals": 0
         },
         "overrides": []
@@ -38,8 +58,16 @@
       "id": 2,
       "title": "4xx Errors",
       "type": "stat",
-      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
-      "datasource": { "type": "loki", "uid": "olma-loki" },
+      "gridPos": {
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "olma-loki"
+      },
       "targets": [
         {
           "expr": "sum(count_over_time({container=\"olma-backend\"} |~ \"status=4[0-9][0-9]\" |~ \"path=/v1/\" [$__range]))",
@@ -51,18 +79,32 @@
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "textMode": "auto"
       },
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "decimals": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "orange", "value": 1 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              }
             ]
           }
         },
@@ -73,8 +115,16 @@
       "id": 3,
       "title": "5xx Errors",
       "type": "stat",
-      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
-      "datasource": { "type": "loki", "uid": "olma-loki" },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "olma-loki"
+      },
       "targets": [
         {
           "expr": "sum(count_over_time({container=\"olma-backend\"} |~ \"status=5[0-9][0-9]\" |~ \"path=/v1/\" [$__range]))",
@@ -86,18 +136,32 @@
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "textMode": "auto"
       },
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "decimals": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "red", "value": 1 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
             ]
           }
         },
@@ -108,8 +172,16 @@
       "id": 4,
       "title": "Login Failures",
       "type": "stat",
-      "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
-      "datasource": { "type": "loki", "uid": "olma-loki" },
+      "gridPos": {
+        "x": 18,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "olma-loki"
+      },
       "targets": [
         {
           "expr": "sum(count_over_time({container=\"olma-backend\"} |= \"login failed\" [$__range]))",
@@ -121,12 +193,21 @@
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "textMode": "auto"
       },
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "fixed", "fixedColor": "purple" },
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "purple"
+          },
           "decimals": 0
         },
         "overrides": []
@@ -136,8 +217,16 @@
       "id": 5,
       "title": "Signups",
       "type": "stat",
-      "gridPos": { "x": 0, "y": 4, "w": 4, "h": 4 },
-      "datasource": { "type": "loki", "uid": "olma-loki" },
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 4,
+        "h": 4
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "olma-loki"
+      },
       "targets": [
         {
           "expr": "sum(count_over_time({container=\"olma-backend\"} |= \"user signed up\" [$__range]))",
@@ -149,11 +238,23 @@
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "textMode": "auto"
       },
       "fieldConfig": {
-        "defaults": { "color": { "mode": "fixed", "fixedColor": "green" }, "decimals": 0 },
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          },
+          "decimals": 0
+        },
         "overrides": []
       }
     },
@@ -161,8 +262,16 @@
       "id": 6,
       "title": "Rate Submissions",
       "type": "stat",
-      "gridPos": { "x": 4, "y": 4, "w": 5, "h": 4 },
-      "datasource": { "type": "loki", "uid": "olma-loki" },
+      "gridPos": {
+        "x": 4,
+        "y": 4,
+        "w": 5,
+        "h": 4
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "olma-loki"
+      },
       "targets": [
         {
           "expr": "sum(count_over_time({container=\"olma-backend\"} |= \"rate submission created\" [$__range]))",
@@ -174,11 +283,23 @@
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "textMode": "auto"
       },
       "fieldConfig": {
-        "defaults": { "color": { "mode": "fixed", "fixedColor": "blue" }, "decimals": 0 },
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "decimals": 0
+        },
         "overrides": []
       }
     },
@@ -186,8 +307,16 @@
       "id": 7,
       "title": "Saved Estimates",
       "type": "stat",
-      "gridPos": { "x": 9, "y": 4, "w": 5, "h": 4 },
-      "datasource": { "type": "loki", "uid": "olma-loki" },
+      "gridPos": {
+        "x": 9,
+        "y": 4,
+        "w": 5,
+        "h": 4
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "olma-loki"
+      },
       "targets": [
         {
           "expr": "sum(count_over_time({container=\"olma-backend\"} |= \"estimate saved\" [$__range]))",
@@ -199,11 +328,23 @@
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "textMode": "auto"
       },
       "fieldConfig": {
-        "defaults": { "color": { "mode": "fixed", "fixedColor": "yellow" }, "decimals": 0 },
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "yellow"
+          },
+          "decimals": 0
+        },
         "overrides": []
       }
     },
@@ -211,8 +352,16 @@
       "id": 8,
       "title": "Community Posts",
       "type": "stat",
-      "gridPos": { "x": 14, "y": 4, "w": 5, "h": 4 },
-      "datasource": { "type": "loki", "uid": "olma-loki" },
+      "gridPos": {
+        "x": 14,
+        "y": 4,
+        "w": 5,
+        "h": 4
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "olma-loki"
+      },
       "targets": [
         {
           "expr": "sum(count_over_time({container=\"olma-backend\"} |= \"community post created\" [$__range]))",
@@ -224,11 +373,23 @@
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "textMode": "auto"
       },
       "fieldConfig": {
-        "defaults": { "color": { "mode": "fixed", "fixedColor": "orange" }, "decimals": 0 },
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "orange"
+          },
+          "decimals": 0
+        },
         "overrides": []
       }
     },
@@ -236,8 +397,16 @@
       "id": 9,
       "title": "Community Comments",
       "type": "stat",
-      "gridPos": { "x": 19, "y": 4, "w": 5, "h": 4 },
-      "datasource": { "type": "loki", "uid": "olma-loki" },
+      "gridPos": {
+        "x": 19,
+        "y": 4,
+        "w": 5,
+        "h": 4
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "olma-loki"
+      },
       "targets": [
         {
           "expr": "sum(count_over_time({container=\"olma-backend\"} |= \"community comment created\" [$__range]))",
@@ -249,11 +418,23 @@
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "textMode": "auto"
       },
       "fieldConfig": {
-        "defaults": { "color": { "mode": "fixed", "fixedColor": "purple" }, "decimals": 0 },
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "purple"
+          },
+          "decimals": 0
+        },
         "overrides": []
       }
     },
@@ -261,8 +442,16 @@
       "id": 10,
       "title": "Request Volume",
       "type": "timeseries",
-      "gridPos": { "x": 0, "y": 8, "w": 8, "h": 8 },
-      "datasource": { "type": "loki", "uid": "olma-loki" },
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 8,
+        "h": 8
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "olma-loki"
+      },
       "targets": [
         {
           "expr": "sum(count_over_time({container=\"olma-backend\"} |= \"request completed\" |~ \"path=/v1/\" [$__interval]))",
@@ -271,19 +460,36 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "fixed", "fixedColor": "blue" },
-          "custom": { "fillOpacity": 15 }
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "custom": {
+            "fillOpacity": 15
+          }
         },
         "overrides": []
       },
-      "options": { "tooltip": { "mode": "single" } }
+      "options": {
+        "tooltip": {
+          "mode": "single"
+        }
+      }
     },
     {
       "id": 11,
       "title": "Error Volume",
       "type": "timeseries",
-      "gridPos": { "x": 8, "y": 8, "w": 8, "h": 8 },
-      "datasource": { "type": "loki", "uid": "olma-loki" },
+      "gridPos": {
+        "x": 8,
+        "y": 8,
+        "w": 8,
+        "h": 8
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "olma-loki"
+      },
       "targets": [
         {
           "expr": "sum(count_over_time({container=\"olma-backend\"} |~ \"status=4[0-9][0-9]\" |~ \"path=/v1/\" [$__interval]))",
@@ -295,30 +501,64 @@
         }
       ],
       "fieldConfig": {
-        "defaults": { "custom": { "fillOpacity": 15 } },
+        "defaults": {
+          "custom": {
+            "fillOpacity": 15
+          }
+        },
         "overrides": [
           {
-            "matcher": { "id": "byName", "options": "4xx" },
+            "matcher": {
+              "id": "byName",
+              "options": "4xx"
+            },
             "properties": [
-              { "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } }
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
             ]
           },
           {
-            "matcher": { "id": "byName", "options": "5xx" },
+            "matcher": {
+              "id": "byName",
+              "options": "5xx"
+            },
             "properties": [
-              { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
             ]
           }
         ]
       },
-      "options": { "tooltip": { "mode": "multi" } }
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
     },
     {
       "id": 12,
       "title": "Demo Milestone Events",
       "type": "timeseries",
-      "gridPos": { "x": 16, "y": 8, "w": 8, "h": 8 },
-      "datasource": { "type": "loki", "uid": "olma-loki" },
+      "gridPos": {
+        "x": 16,
+        "y": 8,
+        "w": 8,
+        "h": 8
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "olma-loki"
+      },
       "targets": [
         {
           "expr": "sum(count_over_time({container=\"olma-backend\"} |= \"user signed up\" [$__interval]))",
@@ -342,17 +582,33 @@
         }
       ],
       "fieldConfig": {
-        "defaults": { "custom": { "fillOpacity": 10 } },
+        "defaults": {
+          "custom": {
+            "fillOpacity": 10
+          }
+        },
         "overrides": []
       },
-      "options": { "tooltip": { "mode": "multi" } }
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
     },
     {
       "id": 13,
       "title": "Recent Failed Requests",
       "type": "logs",
-      "gridPos": { "x": 0, "y": 16, "w": 24, "h": 8 },
-      "datasource": { "type": "loki", "uid": "olma-loki" },
+      "gridPos": {
+        "x": 0,
+        "y": 16,
+        "w": 24,
+        "h": 8
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "olma-loki"
+      },
       "targets": [
         {
           "expr": "{container=\"olma-backend\"} |~ \"status=[45][0-9][0-9]\" |~ \"path=/v1/\"",
@@ -372,8 +628,16 @@
       "id": 14,
       "title": "Core Demo API Request Logs",
       "type": "logs",
-      "gridPos": { "x": 0, "y": 24, "w": 12, "h": 10 },
-      "datasource": { "type": "loki", "uid": "olma-loki" },
+      "gridPos": {
+        "x": 0,
+        "y": 24,
+        "w": 12,
+        "h": 10
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "olma-loki"
+      },
       "targets": [
         {
           "expr": "{container=\"olma-backend\"} |= \"request completed\" |~ \"path=/v1/(auth|submissions|estimates|community)\"",
@@ -393,8 +657,16 @@
       "id": 15,
       "title": "Business Event Logs",
       "type": "logs",
-      "gridPos": { "x": 12, "y": 24, "w": 12, "h": 10 },
-      "datasource": { "type": "loki", "uid": "olma-loki" },
+      "gridPos": {
+        "x": 12,
+        "y": 24,
+        "w": 12,
+        "h": 10
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "olma-loki"
+      },
       "targets": [
         {
           "expr": "{container=\"olma-backend\"} |~ \"user signed up|rate submission created|estimate saved|community post created|community comment created|login failed\"",
@@ -409,6 +681,102 @@
         "wrapLogMessage": false,
         "sortOrder": "Descending"
       }
+    },
+    {
+      "id": 16,
+      "title": "API Average Latency Trend",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 34,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "olma-prometheus"
+      },
+      "targets": [
+        {
+          "expr": "sum by (method, uri) (rate(http_server_requests_seconds_sum{job=\"olma-backend\", uri=~\"/v1/.*\"}[5m])) / sum by (method, uri) (rate(http_server_requests_seconds_count{job=\"olma-backend\", uri=~\"/v1/.*\"}[5m]))",
+          "legendFormat": "{{method}} {{uri}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 3,
+          "custom": {
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "id": 17,
+      "title": "API Average Latency by Endpoint",
+      "type": "table",
+      "gridPos": {
+        "x": 12,
+        "y": 34,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "olma-prometheus"
+      },
+      "targets": [
+        {
+          "expr": "sum by (method, uri) (rate(http_server_requests_seconds_sum{job=\"olma-backend\", uri=~\"/v1/.*\"}[5m])) / sum by (method, uri) (rate(http_server_requests_seconds_count{job=\"olma-backend\", uri=~\"/v1/.*\"}[5m]))",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{method}} {{uri}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 3,
+          "custom": {
+            "align": "auto",
+            "inspect": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Value"
+          }
+        ]
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "job": true,
+              "instance": true
+            },
+            "renameByName": {
+              "method": "Method",
+              "uri": "URI",
+              "Value": "Avg latency"
+            }
+          }
+        }
+      ]
     }
   ]
 }
