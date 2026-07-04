@@ -14,7 +14,7 @@
       "datasource": { "type": "loki", "uid": "olma-loki" },
       "targets": [
         {
-          "expr": "sum(count_over_time({container=\"olma-backend\"} |= \"request completed\" [$__range]))",
+          "expr": "sum(count_over_time({container=\"olma-backend\"} |= \"request completed\" |~ \"path=/v1/\" [$__range]))",
           "legendFormat": "requests"
         }
       ],
@@ -42,7 +42,7 @@
       "datasource": { "type": "loki", "uid": "olma-loki" },
       "targets": [
         {
-          "expr": "sum(count_over_time({container=\"olma-backend\"} |~ \"status=4[0-9][0-9]\" [$__range]))",
+          "expr": "sum(count_over_time({container=\"olma-backend\"} |~ \"status=4[0-9][0-9]\" |~ \"path=/v1/\" [$__range]))",
           "legendFormat": "4xx"
         }
       ],
@@ -77,7 +77,7 @@
       "datasource": { "type": "loki", "uid": "olma-loki" },
       "targets": [
         {
-          "expr": "sum(count_over_time({container=\"olma-backend\"} |~ \"status=5[0-9][0-9]\" [$__range]))",
+          "expr": "sum(count_over_time({container=\"olma-backend\"} |~ \"status=5[0-9][0-9]\" |~ \"path=/v1/\" [$__range]))",
           "legendFormat": "5xx"
         }
       ],
@@ -265,7 +265,7 @@
       "datasource": { "type": "loki", "uid": "olma-loki" },
       "targets": [
         {
-          "expr": "sum(count_over_time({container=\"olma-backend\"} |= \"request completed\" [$__interval]))",
+          "expr": "sum(count_over_time({container=\"olma-backend\"} |= \"request completed\" |~ \"path=/v1/\" [$__interval]))",
           "legendFormat": "requests"
         }
       ],
@@ -286,11 +286,11 @@
       "datasource": { "type": "loki", "uid": "olma-loki" },
       "targets": [
         {
-          "expr": "sum(count_over_time({container=\"olma-backend\"} |~ \"status=4[0-9][0-9]\" [$__interval]))",
+          "expr": "sum(count_over_time({container=\"olma-backend\"} |~ \"status=4[0-9][0-9]\" |~ \"path=/v1/\" [$__interval]))",
           "legendFormat": "4xx"
         },
         {
-          "expr": "sum(count_over_time({container=\"olma-backend\"} |~ \"status=5[0-9][0-9]\" [$__interval]))",
+          "expr": "sum(count_over_time({container=\"olma-backend\"} |~ \"status=5[0-9][0-9]\" |~ \"path=/v1/\" [$__interval]))",
           "legendFormat": "5xx"
         }
       ],
@@ -355,7 +355,7 @@
       "datasource": { "type": "loki", "uid": "olma-loki" },
       "targets": [
         {
-          "expr": "{container=\"olma-backend\"} |~ \"status=[45][0-9][0-9]\"",
+          "expr": "{container=\"olma-backend\"} |~ \"status=[45][0-9][0-9]\" |~ \"path=/v1/\"",
           "legendFormat": ""
         }
       ],
