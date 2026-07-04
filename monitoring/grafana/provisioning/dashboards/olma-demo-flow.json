@@ -669,7 +669,7 @@
       },
       "targets": [
         {
-          "expr": "{container=\"olma-backend\"} |~ \"user signed up|rate submission created|estimate saved|community post created|community comment created|login failed\"",
+          "expr": "{container=\"olma-backend\"} |~ \"user signed up|login failed|rate submission created|rate submission project name updated|estimate saved|estimate project name updated|community post created|community post updated|community post deleted|community comment created|community comment updated|community comment deleted|user profile updated|password changed|outlier marking started|outlier marking completed|outlier marking failed\"",
           "legendFormat": ""
         }
       ],
@@ -698,7 +698,7 @@
       },
       "targets": [
         {
-          "expr": "sum by (method, uri) (rate(http_server_requests_seconds_sum{job=\"olma-backend\", uri=~\"/v1/.*\"}[5m])) / sum by (method, uri) (rate(http_server_requests_seconds_count{job=\"olma-backend\", uri=~\"/v1/.*\"}[5m]))",
+          "expr": "sum by (method, uri) (rate(http_server_requests_seconds_sum{job=\"olma-backend\", method!=\"OPTIONS\", uri=~\"/v1/.*\"}[5m])) / sum by (method, uri) (rate(http_server_requests_seconds_count{job=\"olma-backend\", method!=\"OPTIONS\", uri=~\"/v1/.*\"}[5m]))",
           "legendFormat": "{{method}} {{uri}}"
         }
       ],
@@ -734,7 +734,7 @@
       },
       "targets": [
         {
-          "expr": "sum by (method, uri) (rate(http_server_requests_seconds_sum{job=\"olma-backend\", uri=~\"/v1/.*\"}[5m])) / sum by (method, uri) (rate(http_server_requests_seconds_count{job=\"olma-backend\", uri=~\"/v1/.*\"}[5m]))",
+          "expr": "sum by (method, uri) (rate(http_server_requests_seconds_sum{job=\"olma-backend\", method!=\"OPTIONS\", uri=~\"/v1/.*\"}[5m])) / sum by (method, uri) (rate(http_server_requests_seconds_count{job=\"olma-backend\", method!=\"OPTIONS\", uri=~\"/v1/.*\"}[5m]))",
           "format": "table",
           "instant": true,
           "legendFormat": "{{method}} {{uri}}"

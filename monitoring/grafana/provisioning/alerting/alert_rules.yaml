@@ -101,7 +101,7 @@ groups:
                 type: prometheus
                 uid: olma-prometheus
               editorMode: code
-              expr: sum(increase(http_server_requests_seconds_count{job="olma-backend", status=~"5..", uri=~"/v1/.*"}[2m])) or vector(0)
+              expr: sum(increase(http_server_requests_seconds_count{job="olma-backend", method!="OPTIONS", status=~"5..", uri=~"/v1/.*"}[2m])) or vector(0)
               instant: true
               intervalMs: 1000
               maxDataPoints: 43200
@@ -182,7 +182,7 @@ groups:
                 type: prometheus
                 uid: olma-prometheus
               editorMode: code
-              expr: (sum(rate(http_server_requests_seconds_sum{job="olma-backend", uri=~"/v1/.*"}[5m])) / sum(rate(http_server_requests_seconds_count{job="olma-backend", uri=~"/v1/.*"}[5m]))) or vector(0)
+              expr: (sum(rate(http_server_requests_seconds_sum{job="olma-backend", method!="OPTIONS", uri=~"/v1/.*"}[5m])) / sum(rate(http_server_requests_seconds_count{job="olma-backend", method!="OPTIONS", uri=~"/v1/.*"}[5m]))) or vector(0)
               instant: true
               intervalMs: 1000
               maxDataPoints: 43200
