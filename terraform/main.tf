@@ -193,6 +193,8 @@ resource "aws_instance" "backend" {
     SPRING_DATASOURCE_USERNAME=${var.db_username}
     SPRING_DATASOURCE_PASSWORD=${var.db_password}
     JWT_SECRET=${var.jwt_secret}
+    OPENAI_API_KEY=${var.openai_api_key}
+    OPENAI_MODEL=${var.openai_model}
     ENVEOF
     sed -i 's/^    //' /home/ubuntu/olma.env
     chmod 600 /home/ubuntu/olma.env

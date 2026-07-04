@@ -12,5 +12,9 @@ db_password = "your-secure-password"
 # JWT (generate with: openssl rand -base64 32)
 jwt_secret = "BASE64_ENCODED_SECRET_HERE"
 
+# OpenAI
+openai_api_key = "sk-proj-..."
+openai_model   = "gpt-5.5"
+
 # Monitoring alerts
 discord_webhook_url = "https://discord.com/api/webhooks/WEBHOOK_ID/WEBHOOK_TOKEN"

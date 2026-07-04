@@ -1,6 +1,7 @@
 package com.olma.controller;
 
 import com.olma.dto.ErrorResponse;
+import com.olma.exception.AiEstimateException;
 import com.olma.exception.DuplicateValueException;
 import com.olma.exception.ForbiddenException;
 import com.olma.exception.InvalidCredentialsException;
@@ -54,6 +55,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ErrorResponse> handleForbidden(ForbiddenException ex, HttpServletRequest req) {
         log.warn("Forbidden. path={} message={}", req.getRequestURI(), ex.getMessage());
         return build(HttpStatus.FORBIDDEN, ex.getMessage(), req.getRequestURI(), null);
+    }
+
+    @ExceptionHandler(AiEstimateException.class)
+    public ResponseEntity<ErrorResponse> handleAiEstimate(AiEstimateException ex, HttpServletRequest req) {
+        log.warn("AI estimate failed. path={} message={}", req.getRequestURI(), ex.getMessage());
+        return build(HttpStatus.BAD_GATEWAY, ex.getMessage(), req.getRequestURI(), null);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
