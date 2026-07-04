@@ -122,7 +122,7 @@ Caddyfile:
 
 ## 환경 변수
 
-EC2 `/home/ubuntu/olma.env` 파일로 관리된다. Terraform user_data에서 초기 생성하며, CI/CD 배포 시 `--env-file /home/ubuntu/olma.env` 로 컨테이너에 전달된다.
+백엔드 환경 변수는 EC2 `/home/ubuntu/olma.env` 파일로 관리된다. Terraform user_data에서 초기 생성하며, CI/CD 배포 시 `--env-file /home/ubuntu/olma.env` 로 컨테이너에 전달된다.
 
 | 변수 | 설명 |
 |------|------|
@@ -131,6 +131,12 @@ EC2 `/home/ubuntu/olma.env` 파일로 관리된다. Terraform user_data에서 �
 | `SPRING_DATASOURCE_USERNAME` | DB 사용자명 |
 | `SPRING_DATASOURCE_PASSWORD` | DB 비밀번호 |
 | `JWT_SECRET` | JWT 서명 시크릿 |
+
+모니터링 환경 변수는 EC2 `/home/ubuntu/monitoring.env` 파일로 관리된다. Terraform user_data에서 초기 생성하며, 모니터링 배포 시 Grafana 컨테이너에 전달된다.
+
+| 변수 | 설명 |
+|------|------|
+| `DISCORD_WEBHOOK_URL` | Grafana alert Discord webhook URL |
 
 ---
 
