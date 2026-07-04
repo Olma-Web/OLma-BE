@@ -28,6 +28,7 @@ public class CommunityService {
     private final CommunityPostRepository communityPostRepository;
     private final CommunityCommentRepository communityCommentRepository;
     private final CommunityPostLikeRepository communityPostLikeRepository;
+    private final CommunityCommentLikeRepository communityCommentLikeRepository;
     private final CommunityReportRepository communityReportRepository;
     private final UserRepository userRepository;
 
@@ -187,6 +188,29 @@ public class CommunityService {
         communityPostLikeRepository.findByPost_IdAndUser_Id(postId, userId).ifPresent(like -> {
             communityPostLikeRepository.delete(like);
             post.decreaseLikeCount();
+        });
+    }
+
+    @Transactional
+    public void likeComment(Long commentId, Long userId) {
+        CommunityComment comment = getActiveComment(commentId);
+        User user = getUser(userId);
+        if (communityCommentLikeRepository.findByComment_IdAndUser_Id(commentId, userId).isPresent()) {
+            return;
+        }
+        communityCommentLikeRepository.save(CommunityCommentLike.builder()
+                .comment(comment)
+                .user(user)
+                .build());
+        comment.increaseLikeCount();
+    }
+
+    @Transactional
+    public void unlikeComment(Long commentId, Long userId) {
+        CommunityComment comment = getActiveComment(commentId);
+        communityCommentLikeRepository.findByComment_IdAndUser_Id(commentId, userId).ifPresent(like -> {
+            communityCommentLikeRepository.delete(like);
+            comment.decreaseLikeCount();
         });
     }
 
