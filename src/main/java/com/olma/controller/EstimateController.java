@@ -2,8 +2,11 @@ package com.olma.controller;
 
 import com.olma.dto.EstimateCalculateRequest;
 import com.olma.dto.EstimateCalculateResponse;
+import com.olma.dto.EstimateNegotiationRequest;
 import com.olma.dto.ProjectNameUpdateRequest;
 import com.olma.dto.SavedEstimateResponse;
+import com.olma.domain.value.EstimateNegotiationResult;
+import com.olma.service.EstimateNegotiationService;
 import com.olma.service.EstimateService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,10 +24,16 @@ import java.util.List;
 public class EstimateController {
 
     private final EstimateService estimateService;
+    private final EstimateNegotiationService estimateNegotiationService;
 
     @PostMapping("/calculate")
     public EstimateCalculateResponse calculate(@Valid @RequestBody EstimateCalculateRequest request) {
         return estimateService.calculate(request);
+    }
+
+    @PostMapping("/negotiation/simulate")
+    public EstimateNegotiationResult simulateNegotiation(@Valid @RequestBody EstimateNegotiationRequest request) {
+        return estimateNegotiationService.simulate(request);
     }
 
     @PostMapping

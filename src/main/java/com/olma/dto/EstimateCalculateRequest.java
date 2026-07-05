@@ -36,4 +36,7 @@ public class EstimateCalculateRequest {
 
     @Size(max = 100)
     private String projectName;
+
+    @Positive
+    private Integer negotiationTargetBudgetAmount;
 }

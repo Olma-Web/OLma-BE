@@ -3,6 +3,8 @@ package com.olma.dto;
 import lombok.Builder;
 import lombok.Getter;
 
+import com.olma.domain.value.EstimateNegotiationResult;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -25,5 +27,6 @@ public class EstimateCalculateResponse {
     private Integer addonPercent;
     private Integer step4AddonFee;
     private Integer finalAmount;
+    private EstimateNegotiationResult negotiationResult;
     private OffsetDateTime createdAt;
 }

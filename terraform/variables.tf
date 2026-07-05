@@ -64,21 +64,6 @@ variable "jwt_secret" {
   sensitive   = true
 }
 
-# ---- OpenAI ----
-
-variable "openai_api_key" {
-  description = "OpenAI API key used by the AI estimate engine"
-  type        = string
-  sensitive   = true
-  default     = ""
-}
-
-variable "openai_model" {
-  description = "OpenAI model used by the AI estimate engine"
-  type        = string
-  default     = "gpt-5.5"
-}
-
 # ---- Monitoring ----
 
 variable "discord_webhook_url" {

@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import com.olma.domain.value.EstimateNegotiationResult;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -68,12 +70,16 @@ public class SavedEstimate {
     @Column(name = "project_name", nullable = false, length = 100)
     private String projectName;
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "negotiation_result", columnDefinition = "jsonb")
+    private EstimateNegotiationResult negotiationResult;
+
     @Builder
     public SavedEstimate(User user, ExperienceLevel experienceLevel, JobCategory jobCategory,
                          Integer baseAmount, Integer screenCount,
                          BigDecimal uxMultiplier, BigDecimal platformMultiplier,
                          List<String> addons, Integer addonPercent, Integer finalAmount,
-                         String projectName) {
+                         String projectName, EstimateNegotiationResult negotiationResult) {
         this.user = user;
         this.experienceLevel = experienceLevel;
         this.jobCategory = jobCategory;
@@ -85,6 +91,7 @@ public class SavedEstimate {
         this.addonPercent = addonPercent != null ? addonPercent : 0;
         this.finalAmount = finalAmount;
         this.projectName = normalizeProjectName(projectName);
+        this.negotiationResult = negotiationResult;
     }
 
     public void updateProjectName(String projectName) {

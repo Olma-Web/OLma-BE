@@ -6,6 +6,7 @@ import com.olma.domain.entity.JobCategory;
 import com.olma.domain.entity.SavedEstimate;
 import com.olma.domain.entity.User;
 import com.olma.domain.enums.EstimateAddon;
+import com.olma.domain.value.EstimateNegotiationResult;
 import com.olma.domain.repository.BaseRateRepository;
 import com.olma.domain.repository.ExperienceLevelRepository;
 import com.olma.domain.repository.JobCategoryRepository;
@@ -35,6 +36,7 @@ public class EstimateService {
     private final JobCategoryRepository jobCategoryRepository;
     private final UserRepository userRepository;
     private final SavedEstimateRepository savedEstimateRepository;
+    private final EstimateNegotiationService estimateNegotiationService;
 
     @Transactional(readOnly = true)
     public EstimateCalculateResponse calculate(EstimateCalculateRequest request) {
@@ -89,6 +91,10 @@ public class EstimateService {
 
         Long savedEstimateId = null;
         SavedEstimate saved = null;
+        EstimateNegotiationResult negotiationResult = estimateNegotiationService.simulate(
+                request,
+                request.getNegotiationTargetBudgetAmount(),
+                baseDailyRate);
         if (user != null) {
             saved = savedEstimateRepository.save(SavedEstimate.builder()
                     .user(user)
@@ -102,6 +108,7 @@ public class EstimateService {
                     .addonPercent(addonPercent)
                     .finalAmount(finalAmount)
                     .projectName(request.getProjectName())
+                    .negotiationResult(negotiationResult)
                     .build());
             savedEstimateId = saved.getId();
             log.info("estimate saved estimateId={} userId={}", savedEstimateId, user.getId());
@@ -123,6 +130,7 @@ public class EstimateService {
                 .addonPercent(addonPercent)
                 .step4AddonFee(step4Addition)
                 .finalAmount(finalAmount)
+                .negotiationResult(negotiationResult)
                 .createdAt(saved != null ? saved.getCreatedAt() : null)
                 .build();
     }
@@ -172,6 +180,7 @@ public class EstimateService {
                 .addons(e.getAddons())
                 .addonPercent(e.getAddonPercent())
                 .finalAmount(e.getFinalAmount())
+                .negotiationResult(e.getNegotiationResult())
                 .createdAt(e.getCreatedAt())
                 .build();
     }
