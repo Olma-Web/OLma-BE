@@ -24,6 +24,7 @@ public class CommunityService {
 
     private static final int MAX_PAGE_SIZE = 50;
     private static final int WEEKLY_BEST_LIMIT = 3;
+    private static final int CONTENT_PREVIEW_LENGTH = 120;
 
     private final CommunityPostRepository communityPostRepository;
     private final CommunityCommentRepository communityCommentRepository;
@@ -331,6 +332,7 @@ public class CommunityService {
                 .id(post.getId())
                 .category(post.getCategory())
                 .title(post.getTitle())
+                .contentPreview(toContentPreview(post.getContent()))
                 .author(toAuthorResponse(post.getAuthor()))
                 .imageUrls(post.getImages().stream().map(CommunityPostImage::getImageUrl).toList())
                 .likeCount(post.getLikeCount())
@@ -338,6 +340,15 @@ public class CommunityService {
                 .best(best)
                 .createdAt(post.getCreatedAt())
                 .build();
+    }
+
+    private String toContentPreview(String content) {
+        String normalized = content.strip().replaceAll("\\s+", " ");
+        if (normalized.codePointCount(0, normalized.length()) <= CONTENT_PREVIEW_LENGTH) {
+            return normalized;
+        }
+        int endIndex = normalized.offsetByCodePoints(0, CONTENT_PREVIEW_LENGTH);
+        return normalized.substring(0, endIndex);
     }
 
     private CommunityPostDetailResponse toDetailResponse(CommunityPost post, boolean likedByMe,

@@ -13,6 +13,7 @@ public class CommunityPostSummaryResponse {
     private Long id;
     private CommunityCategory category;
     private String title;
+    private String contentPreview;
     private CommunityAuthorResponse author;
     private List<String> imageUrls;
     private Integer likeCount;
