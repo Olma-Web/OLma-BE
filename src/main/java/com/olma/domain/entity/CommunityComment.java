@@ -31,6 +31,18 @@ public class CommunityComment {
     @JoinColumn(name = "parent_comment_id")
     private CommunityComment parentComment;
 
+    @Column(name = "author_job_category_id")
+    private Long authorJobCategoryId;
+
+    @Column(name = "author_job_category_name")
+    private String authorJobCategoryName;
+
+    @Column(name = "author_experience_level_id")
+    private Long authorExperienceLevelId;
+
+    @Column(name = "author_experience_level_label")
+    private String authorExperienceLevelLabel;
+
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
@@ -53,6 +65,7 @@ public class CommunityComment {
         this.author = author;
         this.parentComment = parentComment;
         this.content = content;
+        snapshotAuthorProfile(author);
     }
 
     public void increaseLikeCount() {
@@ -73,5 +86,16 @@ public class CommunityComment {
 
     public void hide() {
         this.status = CommunityContentStatus.HIDDEN;
+    }
+
+    private void snapshotAuthorProfile(User author) {
+        if (author.getJobCategory() != null) {
+            this.authorJobCategoryId = author.getJobCategory().getId();
+            this.authorJobCategoryName = author.getJobCategory().getName();
+        }
+        if (author.getExperienceLevel() != null) {
+            this.authorExperienceLevelId = author.getExperienceLevel().getId();
+            this.authorExperienceLevelLabel = author.getExperienceLevel().getLabel();
+        }
     }
 }

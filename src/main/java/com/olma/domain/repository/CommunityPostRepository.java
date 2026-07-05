@@ -23,6 +23,22 @@ public interface CommunityPostRepository extends JpaRepository<CommunityPost, Lo
             Pageable pageable
     );
 
+    @Query("""
+            SELECT p
+            FROM CommunityPost p
+            WHERE p.status = :status
+              AND (:category IS NULL OR p.category = :category)
+              AND (:jobCategoryId IS NULL OR p.authorJobCategoryId = :jobCategoryId)
+              AND (:experienceLevelId IS NULL OR p.authorExperienceLevelId = :experienceLevelId)
+            """)
+    Page<CommunityPost> findPosts(
+            @Param("status") CommunityContentStatus status,
+            @Param("category") CommunityCategory category,
+            @Param("jobCategoryId") Long jobCategoryId,
+            @Param("experienceLevelId") Long experienceLevelId,
+            Pageable pageable
+    );
+
     Page<CommunityPost> findAllByAuthor_IdAndStatusOrderByCreatedAtDesc(
             Long authorId,
             CommunityContentStatus status,
@@ -47,6 +63,8 @@ public interface CommunityPostRepository extends JpaRepository<CommunityPost, Lo
             FROM CommunityPost p
             WHERE p.status = :status
               AND (:category IS NULL OR p.category = :category)
+              AND (:jobCategoryId IS NULL OR p.authorJobCategoryId = :jobCategoryId)
+              AND (:experienceLevelId IS NULL OR p.authorExperienceLevelId = :experienceLevelId)
               AND p.createdAt >= :from
               AND p.likeCount > 0
             ORDER BY p.likeCount DESC, p.createdAt DESC
@@ -54,6 +72,8 @@ public interface CommunityPostRepository extends JpaRepository<CommunityPost, Lo
     List<CommunityPost> findWeeklyBest(
             @Param("status") CommunityContentStatus status,
             @Param("category") CommunityCategory category,
+            @Param("jobCategoryId") Long jobCategoryId,
+            @Param("experienceLevelId") Long experienceLevelId,
             @Param("from") OffsetDateTime from,
             Pageable pageable
     );

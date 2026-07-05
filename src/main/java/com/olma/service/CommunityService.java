@@ -3,6 +3,7 @@ package com.olma.service;
 import com.olma.domain.entity.*;
 import com.olma.domain.enums.CommunityCategory;
 import com.olma.domain.enums.CommunityContentStatus;
+import com.olma.domain.enums.CommunityPostSort;
 import com.olma.domain.repository.*;
 import com.olma.dto.*;
 import com.olma.exception.ForbiddenException;
@@ -34,15 +35,28 @@ public class CommunityService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public CommunityPostListResponse getPosts(CommunityCategory category, int page, int size) {
-        PageRequest pageRequest = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), MAX_PAGE_SIZE));
-        Page<CommunityPost> posts = category == null
-                ? communityPostRepository.findAllByStatusOrderByCreatedAtDesc(CommunityContentStatus.ACTIVE, pageRequest)
-                : communityPostRepository.findAllByStatusAndCategoryOrderByCreatedAtDesc(CommunityContentStatus.ACTIVE, category, pageRequest);
+    public CommunityPostListResponse getPosts(CommunityCategory category, CommunityPostSort sort,
+                                              Long jobCategoryId, Long experienceLevelId,
+                                              int page, int size) {
+        CommunityPostSort resolvedSort = sort == null ? CommunityPostSort.LATEST : sort;
+        PageRequest pageRequest = PageRequest.of(
+                Math.max(page, 0),
+                Math.min(Math.max(size, 1), MAX_PAGE_SIZE),
+                resolvedSort.toSort()
+        );
+        Page<CommunityPost> posts = communityPostRepository.findPosts(
+                CommunityContentStatus.ACTIVE,
+                category,
+                jobCategoryId,
+                experienceLevelId,
+                pageRequest
+        );
 
         List<CommunityPost> bestPosts = communityPostRepository.findWeeklyBest(
                 CommunityContentStatus.ACTIVE,
                 category,
+                jobCategoryId,
+                experienceLevelId,
                 OffsetDateTime.now().minusDays(7),
                 PageRequest.of(0, WEEKLY_BEST_LIMIT)
         );
@@ -333,7 +347,13 @@ public class CommunityService {
                 .category(post.getCategory())
                 .title(post.getTitle())
                 .contentPreview(toContentPreview(post.getContent()))
-                .author(toAuthorResponse(post.getAuthor()))
+                .author(toAuthorResponse(
+                        post.getAuthor(),
+                        post.getAuthorJobCategoryId(),
+                        post.getAuthorJobCategoryName(),
+                        post.getAuthorExperienceLevelId(),
+                        post.getAuthorExperienceLevelLabel()
+                ))
                 .imageUrls(post.getImages().stream().map(CommunityPostImage::getImageUrl).toList())
                 .likeCount(post.getLikeCount())
                 .commentCount(post.getCommentCount())
@@ -358,7 +378,13 @@ public class CommunityService {
                 .category(post.getCategory())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .author(toAuthorResponse(post.getAuthor()))
+                .author(toAuthorResponse(
+                        post.getAuthor(),
+                        post.getAuthorJobCategoryId(),
+                        post.getAuthorJobCategoryName(),
+                        post.getAuthorExperienceLevelId(),
+                        post.getAuthorExperienceLevelLabel()
+                ))
                 .imageUrls(post.getImages().stream().map(CommunityPostImage::getImageUrl).toList())
                 .likeCount(post.getLikeCount())
                 .commentCount(post.getCommentCount())
@@ -394,7 +420,13 @@ public class CommunityService {
                 .id(comment.getId())
                 .parentCommentId(comment.getParentComment() != null ? comment.getParentComment().getId() : null)
                 .content(comment.getContent())
-                .author(toAuthorResponse(comment.getAuthor()))
+                .author(toAuthorResponse(
+                        comment.getAuthor(),
+                        comment.getAuthorJobCategoryId(),
+                        comment.getAuthorJobCategoryName(),
+                        comment.getAuthorExperienceLevelId(),
+                        comment.getAuthorExperienceLevelLabel()
+                ))
                 .createdAt(comment.getCreatedAt())
                 .replies(replies)
                 .build();
@@ -413,15 +445,18 @@ public class CommunityService {
                 .build();
     }
 
-    private CommunityAuthorResponse toAuthorResponse(User user) {
-        String jobCategoryName = user.getJobCategory() != null ? user.getJobCategory().getName() : "직군 미설정";
-        String experienceLevelLabel = user.getExperienceLevel() != null ? user.getExperienceLevel().getLabel() : "연차 미설정";
+    private CommunityAuthorResponse toAuthorResponse(User user, Long jobCategoryId, String jobCategoryName,
+                                                     Long experienceLevelId, String experienceLevelLabel) {
+        String resolvedJobCategoryName = jobCategoryName != null ? jobCategoryName : "직군 미설정";
+        String resolvedExperienceLevelLabel = experienceLevelLabel != null ? experienceLevelLabel : "연차 미설정";
         return CommunityAuthorResponse.builder()
                 .id(user.getId())
                 .nickname(user.getNickname())
-                .jobCategoryName(jobCategoryName)
-                .experienceLevelLabel(experienceLevelLabel)
-                .badgeLabel(user.getNickname() + " [" + jobCategoryName + " • " + experienceLevelLabel + "]")
+                .jobCategoryId(jobCategoryId)
+                .jobCategoryName(resolvedJobCategoryName)
+                .experienceLevelId(experienceLevelId)
+                .experienceLevelLabel(resolvedExperienceLevelLabel)
+                .badgeLabel(user.getNickname() + " [" + resolvedJobCategoryName + " • " + resolvedExperienceLevelLabel + "]")
                 .build();
     }
 }

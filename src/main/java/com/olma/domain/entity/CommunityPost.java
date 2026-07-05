@@ -33,6 +33,18 @@ public class CommunityPost {
     @Column(nullable = false, length = 120)
     private String title;
 
+    @Column(name = "author_job_category_id")
+    private Long authorJobCategoryId;
+
+    @Column(name = "author_job_category_name")
+    private String authorJobCategoryName;
+
+    @Column(name = "author_experience_level_id")
+    private Long authorExperienceLevelId;
+
+    @Column(name = "author_experience_level_label")
+    private String authorExperienceLevelLabel;
+
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
@@ -65,6 +77,7 @@ public class CommunityPost {
         this.category = category;
         this.title = title;
         this.content = content;
+        snapshotAuthorProfile(author);
     }
 
     public void addImage(String imageUrl, int sortOrder) {
@@ -109,5 +122,16 @@ public class CommunityPost {
     public void hide() {
         this.status = CommunityContentStatus.HIDDEN;
         this.updatedAt = OffsetDateTime.now();
+    }
+
+    private void snapshotAuthorProfile(User author) {
+        if (author.getJobCategory() != null) {
+            this.authorJobCategoryId = author.getJobCategory().getId();
+            this.authorJobCategoryName = author.getJobCategory().getName();
+        }
+        if (author.getExperienceLevel() != null) {
+            this.authorExperienceLevelId = author.getExperienceLevel().getId();
+            this.authorExperienceLevelLabel = author.getExperienceLevel().getLabel();
+        }
     }
 }

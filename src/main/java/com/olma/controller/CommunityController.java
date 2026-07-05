@@ -1,6 +1,7 @@
 package com.olma.controller;
 
 import com.olma.domain.enums.CommunityCategory;
+import com.olma.domain.enums.CommunityPostSort;
 import com.olma.dto.*;
 import com.olma.service.CommunityService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -20,9 +21,12 @@ public class CommunityController {
 
     @GetMapping("/posts")
     public CommunityPostListResponse getPosts(@RequestParam(required = false) CommunityCategory category,
+                                              @RequestParam(defaultValue = "LATEST") CommunityPostSort sort,
+                                              @RequestParam(required = false) Long jobCategoryId,
+                                              @RequestParam(required = false) Long experienceLevelId,
                                               @RequestParam(defaultValue = "0") int page,
                                               @RequestParam(defaultValue = "20") int size) {
-        return communityService.getPosts(category, page, size);
+        return communityService.getPosts(category, sort, jobCategoryId, experienceLevelId, page, size);
     }
 
     @GetMapping("/me/posts")
