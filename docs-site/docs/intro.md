@@ -27,7 +27,7 @@ description: OLma 백엔드 프로젝트 소개
 
 ## 2. 비즈니스 도메인 및 API 의도 (Domain Intent)
 
-AI Agent와 개발자가 특정 기능의 '존재 이유'를 오해하지 않도록, 컨트롤러별 핵심 비즈니스 목적과 유기적 관계를 명시합니다. 자세한 비즈니스 개념 정의는 [도메인 용어 사전](./development/domain-glossary.md)을 참고하세요.
+AI Agent와 개발자가 특정 기능의 '존재 이유'를 오해하지 않도록, 컨트롤러별 핵심 비즈니스 목적과 유기적 관계를 명시합니다. 자세한 비즈니스 개념 정의는 [도메인 핵심 지식 가이드](./development/domain-knowledge-guide.md)를 참고하세요.
 
 | 도메인 컨트롤러 | 비즈니스 목적 (Intent) 및 역할 | 관련 레퍼런스 |
 | :--- | :--- | :--- |
@@ -73,6 +73,6 @@ src/main/java/com/olma/
 ## 5. 관련 문서
 
 - [API 레퍼런스](./api/rate-submission.md) — 엔드포인트 상세 명세
-- [개발 및 아키텍처 가이드](./development/getting-started.md) — 로컬 개발 환경, 아키텍처 개요, 도메인 용어 사전
+- [개발 및 아키텍처 가이드](./development/architecture-overview.md) — 아키텍처 개요, 도메인 핵심 지식 가이드
 - [운영/배포](./ops/deploy.md) — CI/CD, 인프라 구성
 - [로깅/모니터링](./observability/logging.md) — 로그 전략, MDC, 알림
