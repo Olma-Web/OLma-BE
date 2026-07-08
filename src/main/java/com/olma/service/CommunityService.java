@@ -151,9 +151,9 @@ public class CommunityService {
     public CommunityPostDetailResponse getPost(Long postId, Long userId) {
         CommunityPost post = getActivePost(postId);
         boolean likedByMe = communityPostLikeRepository.findByPost_IdAndUser_Id(postId, userId).isPresent();
-        List<CommunityCommentResponse> comments = buildCommentTree(
-                communityCommentRepository.findAllByPost_IdAndStatusOrderByCreatedAtAsc(postId, CommunityContentStatus.ACTIVE)
-        );
+        List<CommunityComment> activeComments =
+                communityCommentRepository.findAllByPost_IdAndStatusOrderByCreatedAtAsc(postId, CommunityContentStatus.ACTIVE);
+        List<CommunityCommentResponse> comments = buildCommentTree(activeComments, likedCommentIds(userId, activeComments));
         return toDetailResponse(post, likedByMe, comments);
     }
 
@@ -168,9 +168,9 @@ public class CommunityService {
 
         post.update(request.getCategory(), request.getTitle(), request.getContent(), imageUrls);
         boolean likedByMe = communityPostLikeRepository.findByPost_IdAndUser_Id(postId, userId).isPresent();
-        List<CommunityCommentResponse> comments = buildCommentTree(
-                communityCommentRepository.findAllByPost_IdAndStatusOrderByCreatedAtAsc(postId, CommunityContentStatus.ACTIVE)
-        );
+        List<CommunityComment> activeComments =
+                communityCommentRepository.findAllByPost_IdAndStatusOrderByCreatedAtAsc(postId, CommunityContentStatus.ACTIVE);
+        List<CommunityCommentResponse> comments = buildCommentTree(activeComments, likedCommentIds(userId, activeComments));
         log.info("community post updated postId={} userId={}", postId, userId);
         return toDetailResponse(post, likedByMe, comments);
     }
@@ -254,7 +254,7 @@ public class CommunityService {
                 .build());
         post.increaseCommentCount();
         log.info("community comment created commentId={} postId={} userId={}", comment.getId(), postId, userId);
-        return toCommentResponse(comment, List.of());
+        return toCommentResponse(comment, List.of(), Set.of());
     }
 
     @Transactional
@@ -263,7 +263,8 @@ public class CommunityService {
         validateAuthor(comment.getAuthor().getId(), userId);
         comment.update(request.getContent());
         log.info("community comment updated commentId={} userId={}", commentId, userId);
-        return toCommentResponse(comment, List.of());
+        boolean likedByMe = communityCommentLikeRepository.findByComment_IdAndUser_Id(commentId, userId).isPresent();
+        return toCommentResponse(comment, List.of(), likedByMe ? Set.of(commentId) : Set.of());
     }
 
     @Transactional
@@ -394,7 +395,7 @@ public class CommunityService {
                 .build();
     }
 
-    private List<CommunityCommentResponse> buildCommentTree(List<CommunityComment> comments) {
+    private List<CommunityCommentResponse> buildCommentTree(List<CommunityComment> comments, Set<Long> likedCommentIds) {
         Map<Long, List<CommunityComment>> repliesByParentId = new LinkedHashMap<>();
         List<CommunityComment> roots = new ArrayList<>();
         for (CommunityComment comment : comments) {
@@ -410,12 +411,21 @@ public class CommunityService {
                 .map(comment -> toCommentResponse(comment, repliesByParentId
                         .getOrDefault(comment.getId(), List.of())
                         .stream()
-                        .map(reply -> toCommentResponse(reply, List.of()))
-                        .toList()))
+                        .map(reply -> toCommentResponse(reply, List.of(), likedCommentIds))
+                        .toList(), likedCommentIds))
                 .toList();
     }
 
-    private CommunityCommentResponse toCommentResponse(CommunityComment comment, List<CommunityCommentResponse> replies) {
+    private Set<Long> likedCommentIds(Long userId, List<CommunityComment> comments) {
+        if (comments.isEmpty()) {
+            return Set.of();
+        }
+        List<Long> commentIds = comments.stream().map(CommunityComment::getId).toList();
+        return communityCommentLikeRepository.findLikedCommentIds(userId, commentIds);
+    }
+
+    private CommunityCommentResponse toCommentResponse(CommunityComment comment, List<CommunityCommentResponse> replies,
+                                                        Set<Long> likedCommentIds) {
         return CommunityCommentResponse.builder()
                 .id(comment.getId())
                 .parentCommentId(comment.getParentComment() != null ? comment.getParentComment().getId() : null)
@@ -427,6 +437,8 @@ public class CommunityService {
                         comment.getAuthorExperienceLevelId(),
                         comment.getAuthorExperienceLevelLabel()
                 ))
+                .likeCount(comment.getLikeCount())
+                .likedByMe(likedCommentIds.contains(comment.getId()))
                 .createdAt(comment.getCreatedAt())
                 .replies(replies)
                 .build();

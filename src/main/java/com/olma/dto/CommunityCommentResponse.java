@@ -13,6 +13,8 @@ public class CommunityCommentResponse {
     private Long parentCommentId;
     private String content;
     private CommunityAuthorResponse author;
+    private Integer likeCount;
+    private boolean likedByMe;
     private OffsetDateTime createdAt;
     private List<CommunityCommentResponse> replies;
 }
