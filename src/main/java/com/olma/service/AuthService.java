@@ -15,7 +15,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 
@@ -33,8 +35,8 @@ public class AuthService {
     private final SavedEstimateRepository savedEstimateRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+    private final PlatformTransactionManager transactionManager;
 
-    @Transactional
     public AuthSignupResponse signup(AuthSignupRequest request) {
         // email 검증
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -56,23 +58,30 @@ public class AuthService {
                   .orElseThrow(() -> new NotFoundException("JobCategory not found: id=" + request.getJobCategoryId()))
                 : null;
 
-        User user = userRepository.save(User.builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .nickname(request.getNickname())
-                .experienceLevel(experienceLevel)
-                .jobCategory(jobCategory)
-                .build());
+        // CPU 연산(BCrypt)은 DB 커넥션을 붙잡지 않은 상태에서 실행
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
 
-        if (request.getCertificateTypeIds() != null && !request.getCertificateTypeIds().isEmpty()) {
-            List<Long> ids = request.getCertificateTypeIds();
-            List<CertificateType> types = certificateTypeRepository.findAllById(ids);
-            if (ids.size() != types.size()) {
-                throw new NotFoundException("CertificateType not found");
+        // 원자성이 필요한 쓰기(유저 저장 + 자격증 저장)만 짧게 트랜잭션으로 감쌈
+        User user = new TransactionTemplate(transactionManager).execute(status -> {
+            User saved = userRepository.save(User.builder()
+                    .email(request.getEmail())
+                    .password(encodedPassword)
+                    .nickname(request.getNickname())
+                    .experienceLevel(experienceLevel)
+                    .jobCategory(jobCategory)
+                    .build());
+
+            if (request.getCertificateTypeIds() != null && !request.getCertificateTypeIds().isEmpty()) {
+                List<Long> ids = request.getCertificateTypeIds();
+                List<CertificateType> types = certificateTypeRepository.findAllById(ids);
+                if (ids.size() != types.size()) {
+                    throw new NotFoundException("CertificateType not found");
+                }
+                List<UserCertificate> certificates = types.stream().map(t -> UserCertificate.builder().user(saved).certificateType(t).build()).toList();
+                userCertificateRepository.saveAll(certificates);
             }
-            List<UserCertificate> certificates = types.stream().map(t -> UserCertificate.builder().user(user).certificateType(t).build()).toList();
-            userCertificateRepository.saveAll(certificates);
-        }
+            return saved;
+        });
 
         log.info("user signed up userId={}", user.getId());
         return AuthSignupResponse.builder()
