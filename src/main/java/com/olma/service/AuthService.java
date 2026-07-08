@@ -84,7 +84,6 @@ public class AuthService {
                 .build();
     }
 
-    @Transactional
     public AuthLoginResponse login(AuthLoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail()).orElse(null);
         if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
