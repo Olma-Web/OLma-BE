@@ -4,14 +4,25 @@
   "schemaVersion": 38,
   "version": 1,
   "refresh": "30s",
-  "time": { "from": "now-1h", "to": "now" },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
   "panels": [
     {
       "id": 1,
       "title": "HTTP Request Rate",
       "type": "timeseries",
-      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
-      "datasource": { "type": "prometheus", "uid": "olma-prometheus" },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "olma-prometheus"
+      },
       "targets": [
         {
           "expr": "sum(rate(http_server_requests_seconds_count{job=\"olma-backend\"}[1m])) by (uri, status)",
@@ -19,15 +30,27 @@
         }
       ],
       "fieldConfig": {
-        "defaults": { "custom": { "fillOpacity": 10 } }
+        "defaults": {
+          "custom": {
+            "fillOpacity": 10
+          }
+        }
       }
     },
     {
       "id": 2,
       "title": "HTTP Error Rate (4xx / 5xx)",
       "type": "timeseries",
-      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
-      "datasource": { "type": "prometheus", "uid": "olma-prometheus" },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "olma-prometheus"
+      },
       "targets": [
         {
           "expr": "sum(rate(http_server_requests_seconds_count{job=\"olma-backend\", status=~\"4..\"}[1m]))",
@@ -39,10 +62,42 @@
         }
       ],
       "fieldConfig": {
-        "defaults": { "custom": { "fillOpacity": 10 } },
+        "defaults": {
+          "custom": {
+            "fillOpacity": 10
+          }
+        },
         "overrides": [
-          { "matcher": { "id": "byName", "options": "4xx" }, "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }] },
-          { "matcher": { "id": "byName", "options": "5xx" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] }
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "4xx"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "5xx"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
         ]
       }
     },
@@ -50,8 +105,16 @@
       "id": 3,
       "title": "JVM Heap Memory",
       "type": "timeseries",
-      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
-      "datasource": { "type": "prometheus", "uid": "olma-prometheus" },
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "olma-prometheus"
+      },
       "targets": [
         {
           "expr": "jvm_memory_used_bytes{job=\"olma-backend\", area=\"heap\"}",
@@ -65,7 +128,9 @@
       "fieldConfig": {
         "defaults": {
           "unit": "bytes",
-          "custom": { "fillOpacity": 10 }
+          "custom": {
+            "fillOpacity": 10
+          }
         }
       }
     },
@@ -73,8 +138,16 @@
       "id": 4,
       "title": "JVM Threads",
       "type": "timeseries",
-      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
-      "datasource": { "type": "prometheus", "uid": "olma-prometheus" },
+      "gridPos": {
+        "x": 12,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "olma-prometheus"
+      },
       "targets": [
         {
           "expr": "jvm_threads_live_threads{job=\"olma-backend\"}",
@@ -86,15 +159,27 @@
         }
       ],
       "fieldConfig": {
-        "defaults": { "custom": { "fillOpacity": 10 } }
+        "defaults": {
+          "custom": {
+            "fillOpacity": 10
+          }
+        }
       }
     },
     {
       "id": 5,
       "title": "DB Connection Pool",
       "type": "timeseries",
-      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
-      "datasource": { "type": "prometheus", "uid": "olma-prometheus" },
+      "gridPos": {
+        "x": 0,
+        "y": 16,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "olma-prometheus"
+      },
       "targets": [
         {
           "expr": "hikaricp_connections_active{job=\"olma-backend\"}",
@@ -110,15 +195,99 @@
         }
       ],
       "fieldConfig": {
-        "defaults": { "custom": { "fillOpacity": 10 } }
+        "defaults": {
+          "decimals": 0,
+          "min": 0,
+          "custom": {
+            "fillOpacity": 0,
+            "lineWidth": 2,
+            "lineInterpolation": "stepAfter",
+            "spanNulls": false,
+            "pointSize": 5,
+            "showPoints": "auto"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "active"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "semi-dark-green",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 3
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "idle"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "max"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "semi-dark-blue",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 1
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    10,
+                    10
+                  ],
+                  "fill": "dash"
+                }
+              }
+            ]
+          }
+        ]
       }
     },
     {
       "id": 6,
       "title": "HTTP P99 Response Time",
       "type": "timeseries",
-      "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 },
-      "datasource": { "type": "prometheus", "uid": "olma-prometheus" },
+      "gridPos": {
+        "x": 12,
+        "y": 16,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "olma-prometheus"
+      },
       "targets": [
         {
           "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket{job=\"olma-backend\"}[1m])) by (le, uri))",
@@ -128,7 +297,9 @@
       "fieldConfig": {
         "defaults": {
           "unit": "s",
-          "custom": { "fillOpacity": 10 }
+          "custom": {
+            "fillOpacity": 10
+          }
         }
       }
     }

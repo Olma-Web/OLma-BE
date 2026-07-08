@@ -17,6 +17,11 @@ out/
 # Environment
 .env
 
+# Local-only monitoring overrides (never deploy these)
+monitoring/docker-compose.override.yml
+monitoring/prometheus/prometheus.local.yml
+monitoring/promtail/config.local.yml
+
 # Claude Code local settings
 .claude/settings.local.json
 

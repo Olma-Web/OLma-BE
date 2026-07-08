@@ -8,3 +8,9 @@ spring:
 logging:
   level:
     com.olma: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,metrics

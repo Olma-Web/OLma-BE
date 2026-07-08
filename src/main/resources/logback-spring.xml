@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+    <appender name="DISCORD" class="com.github.napstr.logback.DiscordAppender">
+        <webhookUri>${DISCORD_WEBHOOK_URL:-}</webhookUri>
+        <username>감자야...에러 났대...</username>
+        <avatarUrl>
+            https://jjal.today/data/file/gallery/1889155643_NZHvkRLz_e0292b65bb682075bfdb752a4d8f4062f0b7738a.png
+        </avatarUrl>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%d{HH:mm:ss} [%-5level] %logger{36} - %msg%n```%ex{15}```</pattern>
+        </layout>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+    </appender>
+
+    <logger name="com.olma.controller.GlobalExceptionHandler" level="ERROR" additivity="true">
+        <appender-ref ref="DISCORD"/>
+    </logger>
+
+    <logger name="com.olma.service" level="ERROR" additivity="true">
+        <appender-ref ref="DISCORD"/>
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>
