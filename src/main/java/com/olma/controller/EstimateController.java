@@ -1,8 +1,10 @@
 package com.olma.controller;
 
+import com.olma.domain.enums.NegotiationSimulationStatus;
 import com.olma.dto.EstimateCalculateRequest;
 import com.olma.dto.EstimateCalculateResponse;
 import com.olma.dto.EstimateNegotiationRequest;
+import com.olma.dto.NegotiationSimulationProgressRequest;
 import com.olma.dto.ProjectNameUpdateRequest;
 import com.olma.dto.SavedEstimateResponse;
 import com.olma.domain.value.EstimateNegotiationResult;
@@ -45,9 +47,19 @@ public class EstimateController {
     }
 
     @GetMapping
-    public List<SavedEstimateResponse> getMyEstimates(HttpServletRequest httpRequest) {
+    public List<SavedEstimateResponse> getMyEstimates(
+            @RequestParam(required = false) NegotiationSimulationStatus negotiationSimulationStatus,
+            @RequestParam(required = false) Boolean negotiationSimulationStarted,
+            HttpServletRequest httpRequest
+    ) {
         Long userId = (Long) httpRequest.getAttribute("userId");
-        return estimateService.getMyEstimates(userId);
+        return estimateService.getMyEstimates(userId, negotiationSimulationStatus, negotiationSimulationStarted);
+    }
+
+    @GetMapping("/{id}")
+    public SavedEstimateResponse getMyEstimate(@PathVariable Long id, HttpServletRequest httpRequest) {
+        Long userId = (Long) httpRequest.getAttribute("userId");
+        return estimateService.getMyEstimate(userId, id);
     }
 
     @PatchMapping("/{id}/project-name")
@@ -56,6 +68,33 @@ public class EstimateController {
                                                    HttpServletRequest httpRequest) {
         Long userId = (Long) httpRequest.getAttribute("userId");
         return estimateService.updateProjectName(userId, id, request);
+    }
+
+    @PatchMapping("/{id}/negotiation-simulation/start")
+    public SavedEstimateResponse markNegotiationSimulationStarted(@PathVariable Long id,
+                                                                  HttpServletRequest httpRequest) {
+        Long userId = (Long) httpRequest.getAttribute("userId");
+        return estimateService.markNegotiationSimulationStarted(userId, id);
+    }
+
+    @PatchMapping("/{id}/negotiation-simulation/progress")
+    public SavedEstimateResponse updateNegotiationSimulationProgress(
+            @PathVariable Long id,
+            @Valid @RequestBody NegotiationSimulationProgressRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        Long userId = (Long) httpRequest.getAttribute("userId");
+        return estimateService.updateNegotiationSimulationProgress(userId, id, request);
+    }
+
+    @PatchMapping("/{id}/negotiation-simulation/complete")
+    public SavedEstimateResponse completeNegotiationSimulation(
+            @PathVariable Long id,
+            @RequestBody(required = false) NegotiationSimulationProgressRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        Long userId = (Long) httpRequest.getAttribute("userId");
+        return estimateService.completeNegotiationSimulation(userId, id, request);
     }
 
     @DeleteMapping("/{id}")
