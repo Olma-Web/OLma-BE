@@ -1,5 +1,8 @@
 package com.olma.domain.entity;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.olma.domain.enums.NegotiationSimulationStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -68,6 +71,23 @@ public class SavedEstimate {
     @Column(name = "project_name", nullable = false, length = 100)
     private String projectName;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "negotiation_simulation_status", nullable = false, length = 20)
+    private NegotiationSimulationStatus negotiationSimulationStatus = NegotiationSimulationStatus.NOT_STARTED;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "negotiation_simulation_state", nullable = false, columnDefinition = "jsonb")
+    private JsonNode negotiationSimulationState = JsonNodeFactory.instance.objectNode();
+
+    @Column(name = "negotiation_simulation_started_at")
+    private OffsetDateTime negotiationSimulationStartedAt;
+
+    @Column(name = "negotiation_simulation_updated_at")
+    private OffsetDateTime negotiationSimulationUpdatedAt;
+
+    @Column(name = "negotiation_simulation_completed_at")
+    private OffsetDateTime negotiationSimulationCompletedAt;
+
     @Builder
     public SavedEstimate(User user, ExperienceLevel experienceLevel, JobCategory jobCategory,
                          Integer baseAmount, Integer screenCount,
@@ -89,6 +109,38 @@ public class SavedEstimate {
 
     public void updateProjectName(String projectName) {
         this.projectName = normalizeProjectName(projectName);
+    }
+
+    public void markNegotiationSimulationStarted() {
+        if (negotiationSimulationStatus == NegotiationSimulationStatus.NOT_STARTED) {
+            OffsetDateTime now = OffsetDateTime.now();
+            negotiationSimulationStatus = NegotiationSimulationStatus.IN_PROGRESS;
+            negotiationSimulationStartedAt = now;
+            negotiationSimulationUpdatedAt = now;
+        }
+    }
+
+    public void updateNegotiationSimulationProgress(JsonNode state) {
+        if (negotiationSimulationStatus == NegotiationSimulationStatus.COMPLETED) {
+            throw new IllegalArgumentException("Negotiation simulation is already completed");
+        }
+        markNegotiationSimulationStarted();
+        negotiationSimulationState = state != null ? state : JsonNodeFactory.instance.objectNode();
+        negotiationSimulationUpdatedAt = OffsetDateTime.now();
+    }
+
+    public void completeNegotiationSimulation(JsonNode state) {
+        if (negotiationSimulationStatus == NegotiationSimulationStatus.COMPLETED) {
+            return;
+        }
+        markNegotiationSimulationStarted();
+        if (state != null) {
+            negotiationSimulationState = state;
+        }
+        OffsetDateTime now = OffsetDateTime.now();
+        negotiationSimulationStatus = NegotiationSimulationStatus.COMPLETED;
+        negotiationSimulationUpdatedAt = now;
+        negotiationSimulationCompletedAt = now;
     }
 
     private String normalizeProjectName(String value) {
