@@ -37,6 +37,19 @@ services:
     restart: unless-stopped
     mem_limit: 150m
 
+  node-exporter:
+    image: prom/node-exporter:v1.8.1
+    container_name: node-exporter
+    pid: host
+    volumes:
+      - /:/host:ro,rslave
+    command:
+      - '--path.rootfs=/host'
+    networks:
+      - monitoring
+    restart: unless-stopped
+    mem_limit: 80m
+
   promtail:
     image: grafana/promtail:3.0.0
     container_name: promtail
