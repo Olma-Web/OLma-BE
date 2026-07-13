@@ -1,10 +1,12 @@
 name: Deploy Monitoring
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
       - 'monitoring/**'
+      - '.github/workflows/deploy-monitoring.yml'
 
 jobs:
   deploy:
@@ -32,4 +34,4 @@ jobs:
         working-directory: monitoring
         run: |
           docker compose up -d --remove-orphans
-          docker compose restart grafana
+          docker compose restart prometheus grafana
