@@ -2,6 +2,8 @@ package com.olma.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.olma.domain.enums.NegotiationSimulationStatus;
+import com.olma.domain.enums.PlatformEnvironment;
+import com.olma.domain.enums.UxEngagement;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -22,7 +24,9 @@ public class SavedEstimateResponse {
     private String jobCategoryName;
     private Integer baseAmount;
     private Integer screenCount;
+    private UxEngagement uxEngagement;
     private BigDecimal uxMultiplier;
+    private PlatformEnvironment platformEnvironment;
     private BigDecimal platformMultiplier;
     private List<String> addons;
     private Integer addonPercent;

@@ -3,6 +3,8 @@ package com.olma.domain.entity;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.olma.domain.enums.NegotiationSimulationStatus;
+import com.olma.domain.enums.PlatformEnvironment;
+import com.olma.domain.enums.UxEngagement;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -51,8 +53,16 @@ public class SavedEstimate {
     @Column(name = "screen_count", nullable = false)
     private Integer screenCount;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ux_engagement", nullable = false, length = 20)
+    private UxEngagement uxEngagement;
+
     @Column(name = "ux_multiplier", nullable = false, precision = 3, scale = 2)
     private BigDecimal uxMultiplier;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "platform_environment", nullable = false, length = 20)
+    private PlatformEnvironment platformEnvironment;
 
     @Column(name = "platform_multiplier", nullable = false, precision = 3, scale = 2)
     private BigDecimal platformMultiplier;
@@ -97,7 +107,8 @@ public class SavedEstimate {
     @Builder
     public SavedEstimate(User user, ExperienceLevel experienceLevel, JobCategory jobCategory,
                          Integer baseAmount, Integer screenCount,
-                         BigDecimal uxMultiplier, BigDecimal platformMultiplier,
+                         UxEngagement uxEngagement, BigDecimal uxMultiplier,
+                         PlatformEnvironment platformEnvironment, BigDecimal platformMultiplier,
                          List<String> addons, Integer addonPercent, Integer finalAmount,
                          String projectName, EstimateNegotiationResult negotiationResult) {
         this.user = user;
@@ -105,7 +116,9 @@ public class SavedEstimate {
         this.jobCategory = jobCategory;
         this.baseAmount = baseAmount;
         this.screenCount = screenCount;
+        this.uxEngagement = uxEngagement;
         this.uxMultiplier = uxMultiplier;
+        this.platformEnvironment = platformEnvironment;
         this.platformMultiplier = platformMultiplier;
         this.addons = addons != null ? addons : new ArrayList<>();
         this.addonPercent = addonPercent != null ? addonPercent : 0;
