@@ -81,7 +81,7 @@ jobs:
 
   deploy:
     needs: build
-    runs-on: self-hosted
+    runs-on: [self-hosted, Linux, ARM64, olma]
 
     steps:
       - name: Pull new image
