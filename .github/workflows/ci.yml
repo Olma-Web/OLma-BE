@@ -79,30 +79,6 @@ jobs:
             ${{ env.IMAGE }}:latest
             ${{ env.IMAGE }}:${{ github.sha }}
 
-  deploy-docs:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: self-hosted
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install dependencies
-        run: npm ci
-        working-directory: docs-site
-
-      - name: Build
-        run: npm run build
-        working-directory: docs-site
-
-      - name: Deploy to /var/www/docs
-        run: |
-          sudo mkdir -p /var/www/docs
-          sudo rsync -a --delete docs-site/build/ /var/www/docs/
-
   deploy:
     needs: build
     runs-on: self-hosted
@@ -121,6 +97,6 @@ jobs:
             --name olma-backend \
             --env-file /home/ubuntu/olma.env \
             --network monitoring \
-            -p 8080:8080 \
+            -p 127.0.0.1:8080:8080 \
             --restart unless-stopped \
             ghcr.io/olma-web/olma-backend:latest
