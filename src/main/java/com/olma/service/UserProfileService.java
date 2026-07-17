@@ -131,6 +131,7 @@ public class UserProfileService {
                 .duration(s.getDuration())
                 .amount(s.getAmount())
                 .amountUnit(s.getAmountUnit())
+                .normalizedMonthly(s.getNormalizedMonthly())
                 .jobCategoryName(s.getJobCategory().getName())
                 .experienceLevelLabel(s.getExperienceLevel().getLabel())
                 .createdAt(s.getCreatedAt())

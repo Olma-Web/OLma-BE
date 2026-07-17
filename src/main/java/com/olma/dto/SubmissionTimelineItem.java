@@ -18,6 +18,7 @@ public class SubmissionTimelineItem {
     private String duration;
     private Integer amount;
     private AmountUnit amountUnit;
+    private Integer normalizedMonthly;
     private String jobCategoryName;
     private String experienceLevelLabel;
     private OffsetDateTime createdAt;
