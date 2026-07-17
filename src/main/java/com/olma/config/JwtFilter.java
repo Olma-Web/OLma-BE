@@ -1,7 +1,9 @@
 package com.olma.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.olma.domain.repository.UserRepository;
 import com.olma.dto.ErrorResponse;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,9 +24,11 @@ public class JwtFilter implements Filter {
 
     private final JwtProvider jwtProvider;
     private final ObjectMapper objectMapper;
+    private final UserRepository userRepository;
 
     private static final List<String> PERMIT_PREFIXES = List.of(
-            "/v1/auth/",
+            "/v1/auth/login",
+            "/v1/auth/signup",
             "/swagger-ui",
             "/v3/api-docs",
             "/actuator"
@@ -53,7 +57,17 @@ public class JwtFilter implements Filter {
         }
 
         try {
-            Long userId = jwtProvider.validateJwtToken(header.substring(7));
+            // 서명과 만료를 먼저 통과한 토큰만 DB를 조회한다.
+            Claims claims = jwtProvider.parseClaims(header.substring(7));
+            Long userId = jwtProvider.getUserId(claims);
+
+            // 탈퇴한 유저는 조회 결과가 비고, 로그아웃한 유저는 세대가 어긋난다.
+            Integer currentVersion = userRepository.findTokenVersionById(userId).orElse(null);
+            if (currentVersion == null || !currentVersion.equals(jwtProvider.getTokenVersion(claims))) {
+                writeErrorResponse(response, request, HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않거나 만료된 토큰입니다.");
+                return;
+            }
+
             request.setAttribute("userId", userId);
             MDC.put("userId", String.valueOf(userId));
         } catch (JwtException e) {

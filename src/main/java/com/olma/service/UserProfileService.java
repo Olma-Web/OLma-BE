@@ -1,18 +1,8 @@
 package com.olma.service;
 
-import com.olma.domain.entity.CertificateType;
-import com.olma.domain.entity.ExperienceLevel;
-import com.olma.domain.entity.JobCategory;
-import com.olma.domain.entity.RateSubmission;
-import com.olma.domain.entity.User;
-import com.olma.domain.entity.UserCertificate;
+import com.olma.domain.entity.*;
 import com.olma.domain.enums.SubmissionStatus;
-import com.olma.domain.repository.CertificateTypeRepository;
-import com.olma.domain.repository.ExperienceLevelRepository;
-import com.olma.domain.repository.JobCategoryRepository;
-import com.olma.domain.repository.RateSubmissionRepository;
-import com.olma.domain.repository.UserCertificateRepository;
-import com.olma.domain.repository.UserRepository;
+import com.olma.domain.repository.*;
 import com.olma.dto.ChangePasswordRequest;
 import com.olma.dto.SubmissionTimelineItem;
 import com.olma.dto.UserProfileResponse;
@@ -55,11 +45,11 @@ public class UserProfileService {
 
         ExperienceLevel experienceLevel = request.getExperienceLevelId() != null
                 ? experienceLevelRepository.findById(request.getExperienceLevelId())
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid experience level"))
+                  .orElseThrow(() -> new IllegalArgumentException("Invalid experience level"))
                 : null;
         JobCategory jobCategory = request.getJobCategoryId() != null
                 ? jobCategoryRepository.findById(request.getJobCategoryId())
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid job category"))
+                  .orElseThrow(() -> new IllegalArgumentException("Invalid job category"))
                 : null;
 
         user.updateProfile(experienceLevel, jobCategory);
@@ -119,6 +109,8 @@ public class UserProfileService {
             throw new InvalidCredentialsException("현재 비밀번호가 올바르지 않습니다.");
         }
         user.changePassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.increaseTokenVersion(userId);
+
         log.info("password changed userId={}", userId);
     }
 

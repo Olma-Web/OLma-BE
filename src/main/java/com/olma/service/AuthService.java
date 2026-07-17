@@ -89,7 +89,7 @@ public class AuthService {
                 .email(user.getEmail())
                 .nickname(user.getNickname())
                 .agreementAt(user.getAgreementAt())
-                .token(jwtProvider.generateJwtToken(user.getId()))
+                .token(jwtProvider.generateJwtToken(user.getId(), user.getTokenVersion()))
                 .build();
     }
 
@@ -101,8 +101,14 @@ public class AuthService {
         }
         return AuthLoginResponse.builder()
                 .id(user.getId())
-                .token(jwtProvider.generateJwtToken(user.getId()))
+                .token(jwtProvider.generateJwtToken(user.getId(), user.getTokenVersion()))
                 .build();
+    }
+
+    @Transactional
+    public void logout(Long userId) {
+        userRepository.increaseTokenVersion(userId);
+        log.info("user logged out userId={}", userId);
     }
 
     @Transactional
