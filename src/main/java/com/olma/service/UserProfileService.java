@@ -1,5 +1,9 @@
 package com.olma.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.olma.domain.entity.CertificateType;
 import com.olma.domain.entity.ExperienceLevel;
 import com.olma.domain.entity.JobCategory;
@@ -14,6 +18,7 @@ import com.olma.domain.repository.RateSubmissionRepository;
 import com.olma.domain.repository.UserCertificateRepository;
 import com.olma.domain.repository.UserRepository;
 import com.olma.dto.ChangePasswordRequest;
+import com.olma.dto.ProfileSpecProgressRequest;
 import com.olma.dto.SubmissionTimelineItem;
 import com.olma.dto.UserProfileResponse;
 import com.olma.dto.UserProfileUpdateRequest;
@@ -77,8 +82,20 @@ public class UserProfileService {
             userCertificateRepository.saveAll(newCerts);
         }
 
+        user.completeProfileSpec(toProfileSpecState(request));
+
         log.info("user profile updated userId={}", userId);
         return toResponse(user, newCerts);
+    }
+
+    @Transactional
+    public UserProfileResponse updateProfileSpecProgress(Long userId, ProfileSpecProgressRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found: id=" + userId));
+        user.updateProfileSpecProgress(request.getState());
+        List<UserCertificate> certs = userCertificateRepository.findAllByUser_Id(userId);
+        log.info("user profile spec progress saved userId={}", userId);
+        return toResponse(user, certs);
     }
 
     @Transactional(readOnly = true)
@@ -108,7 +125,32 @@ public class UserProfileService {
                                 .name(c.getCertificateType().getName())
                                 .build())
                         .toList())
+                .profileSpecStatus(user.getProfileSpecStatus())
+                .profileSpecState(user.getProfileSpecState())
+                .profileSpecStartedAt(user.getProfileSpecStartedAt())
+                .profileSpecUpdatedAt(user.getProfileSpecUpdatedAt())
+                .profileSpecCompletedAt(user.getProfileSpecCompletedAt())
                 .build();
+    }
+
+    private JsonNode toProfileSpecState(UserProfileUpdateRequest request) {
+        ObjectNode state = JsonNodeFactory.instance.objectNode();
+        putNullableLong(state, "jobCategoryId", request.getJobCategoryId());
+        putNullableLong(state, "experienceLevelId", request.getExperienceLevelId());
+
+        ArrayNode certificateIds = state.putArray("certificateTypeIds");
+        if (request.getCertificateTypeIds() != null) {
+            request.getCertificateTypeIds().forEach(certificateIds::add);
+        }
+        return state;
+    }
+
+    private void putNullableLong(ObjectNode node, String fieldName, Long value) {
+        if (value == null) {
+            node.putNull(fieldName);
+        } else {
+            node.put(fieldName, value);
+        }
     }
 
     @Transactional

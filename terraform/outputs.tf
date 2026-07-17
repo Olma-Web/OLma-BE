@@ -10,7 +10,17 @@ output "ssh_command" {
 
 output "api_url" {
   description = "Backend API URL"
-  value       = "http://${aws_eip.backend.public_ip}:8080"
+  value       = "https://${var.domain}"
+}
+
+output "docs_url" {
+  description = "Documentation site URL"
+  value       = "https://${var.docs_domain}"
+}
+
+output "grafana_url" {
+  description = "Grafana URL"
+  value       = "https://${var.grafana_domain}"
 }
 
 output "db_endpoint" {

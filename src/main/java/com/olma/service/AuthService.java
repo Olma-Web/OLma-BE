@@ -1,5 +1,9 @@
 package com.olma.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.olma.config.JwtProvider;
 import com.olma.domain.entity.*;
 import com.olma.domain.enums.SubmissionStatus;
@@ -80,6 +84,9 @@ public class AuthService {
                 List<UserCertificate> certificates = types.stream().map(t -> UserCertificate.builder().user(saved).certificateType(t).build()).toList();
                 userCertificateRepository.saveAll(certificates);
             }
+            if (hasProfileSpec(request)) {
+                saved.completeProfileSpec(toProfileSpecState(request));
+            }
             return saved;
         });
 
@@ -91,6 +98,32 @@ public class AuthService {
                 .agreementAt(user.getAgreementAt())
                 .token(jwtProvider.generateJwtToken(user.getId()))
                 .build();
+    }
+
+    private boolean hasProfileSpec(AuthSignupRequest request) {
+        return request.getExperienceLevelId() != null
+                || request.getJobCategoryId() != null
+                || (request.getCertificateTypeIds() != null && !request.getCertificateTypeIds().isEmpty());
+    }
+
+    private JsonNode toProfileSpecState(AuthSignupRequest request) {
+        ObjectNode state = JsonNodeFactory.instance.objectNode();
+        putNullableLong(state, "jobCategoryId", request.getJobCategoryId());
+        putNullableLong(state, "experienceLevelId", request.getExperienceLevelId());
+
+        ArrayNode certificateIds = state.putArray("certificateTypeIds");
+        if (request.getCertificateTypeIds() != null) {
+            request.getCertificateTypeIds().forEach(certificateIds::add);
+        }
+        return state;
+    }
+
+    private void putNullableLong(ObjectNode node, String fieldName, Long value) {
+        if (value == null) {
+            node.putNull(fieldName);
+        } else {
+            node.put(fieldName, value);
+        }
     }
 
     public AuthLoginResponse login(AuthLoginRequest request) {

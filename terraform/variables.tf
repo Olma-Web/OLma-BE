@@ -5,9 +5,21 @@ variable "region" {
 }
 
 variable "domain" {
-  description = "Domain for Caddy reverse proxy (HTTPS)"
+  description = "Backend API domain for Caddy reverse proxy (HTTPS)"
   type        = string
-  default     = "olma.lumie-infra.com"
+  default     = "api.olma.kro.kr"
+}
+
+variable "docs_domain" {
+  description = "Documentation site domain served by Caddy"
+  type        = string
+  default     = "docs.olma.kro.kr"
+}
+
+variable "grafana_domain" {
+  description = "Grafana domain served by Caddy"
+  type        = string
+  default     = "grafana.olma.kro.kr"
 }
 
 # ---- SSH ----

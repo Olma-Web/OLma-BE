@@ -6,6 +6,11 @@ ghcr_username = "your-github-username"
 ghcr_token    = "ghp_xxxxxxxxxxxx"
 ghcr_image    = "olma-web/olma-backend"
 
+# Domains
+domain      = "api.olma.kro.kr"
+docs_domain = "docs.olma.kro.kr"
+grafana_domain = "grafana.olma.kro.kr"
+
 # Database
 db_password = "your-secure-password"
 

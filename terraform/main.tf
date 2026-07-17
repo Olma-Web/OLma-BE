@@ -10,7 +10,8 @@ terraform {
 }
 
 provider "aws" {
-  region = var.region
+  region  = var.region
+  profile = "suji"
 }
 
 # ============================================================
@@ -76,14 +77,6 @@ resource "aws_security_group" "backend" {
     description = "HTTPS (Caddy)"
     from_port   = 443
     to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    description = "Backend API (direct)"
-    from_port   = 8080
-    to_port     = 8080
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -161,8 +154,6 @@ resource "aws_instance" "backend" {
   vpc_security_group_ids = [aws_security_group.backend.id]
   subnet_id              = data.aws_subnets.default.ids[0]
 
-  user_data_replace_on_change = true
-
   credit_specification {
     cpu_credits = "standard"
   }
@@ -171,9 +162,20 @@ resource "aws_instance" "backend" {
     #!/bin/bash
     set -e
 
+    # The regional ARM mirror can time out over plain HTTP during first boot.
+    cat > /etc/apt/apt.conf.d/99olma-retries << 'APTEOF'
+    Acquire::ForceIPv4 "true";
+    Acquire::Retries "5";
+    Acquire::http::Timeout "30";
+    APTEOF
+    sed -i \
+      -e 's#http://ap-northeast-2a.clouds.ports.ubuntu.com/ubuntu-ports/#https://ports.ubuntu.com/ubuntu-ports/#g' \
+      -e 's#http://ports.ubuntu.com/ubuntu-ports#https://ports.ubuntu.com/ubuntu-ports#g' \
+      /etc/apt/sources.list.d/ubuntu.sources
+
     # Docker
     apt-get update
-    apt-get install -y docker.io
+    apt-get install -y docker.io docker-compose-v2
     usermod -aG docker ubuntu
     systemctl enable docker
     systemctl start docker
@@ -214,13 +216,17 @@ resource "aws_instance" "backend" {
     apt-get install -y caddy
 
     cat > /etc/caddy/Caddyfile << 'CADDYEOF'
-    docs.olma.kro.kr {
+    ${var.docs_domain} {
       root * /var/www/docs
       file_server
     }
 
-    :80 {
+    ${var.domain} {
       reverse_proxy localhost:8080
+    }
+
+    ${var.grafana_domain} {
+      reverse_proxy localhost:3000
     }
     CADDYEOF
     sed -i 's/^    //' /etc/caddy/Caddyfile
@@ -232,7 +238,7 @@ resource "aws_instance" "backend" {
     docker run -d \
       --name olma-backend \
       --restart unless-stopped \
-      -p 8080:8080 \
+      -p 127.0.0.1:8080:8080 \
       --env-file /home/ubuntu/olma.env \
       ghcr.io/${var.ghcr_image}:latest
 
@@ -244,6 +250,10 @@ resource "aws_instance" "backend" {
   }
 
   tags = { Name = "olma-backend" }
+
+  lifecycle {
+    ignore_changes = [user_data]
+  }
 
   depends_on = [aws_db_instance.olma]
 }
