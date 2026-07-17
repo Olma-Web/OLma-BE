@@ -131,6 +131,15 @@ public class SavedEstimate {
         this.projectName = normalizeProjectName(projectName);
     }
 
+    public void mergeSaveRequest(String projectName, EstimateNegotiationResult negotiationResult) {
+        if (projectName != null && !projectName.isBlank()) {
+            updateProjectName(projectName);
+        }
+        if (negotiationResult != null) {
+            this.negotiationResult = negotiationResult;
+        }
+    }
+
     public void markNegotiationSimulationStarted() {
         if (negotiationSimulationStatus == NegotiationSimulationStatus.NOT_STARTED) {
             OffsetDateTime now = OffsetDateTime.now();
