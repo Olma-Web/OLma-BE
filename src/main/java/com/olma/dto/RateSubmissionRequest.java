@@ -21,8 +21,6 @@ public class RateSubmissionRequest {
     @NotNull
     private Long experienceLevelId;
 
-    private Long userId;
-
     @NotNull
     private SubmissionType submissionType;
 

@@ -23,10 +23,8 @@ public class RateSubmissionController {
     @ResponseStatus(HttpStatus.CREATED)
     public RateSubmissionResponse create(@Valid @RequestBody RateSubmissionRequest request,
                                          HttpServletRequest httpRequest) {
-        if (request.getUserId() == null) {
-            request.setUserId((Long) httpRequest.getAttribute("userId"));
-        }
-        return rateSubmissionService.create(request);
+        Long userId = (Long) httpRequest.getAttribute("userId");
+        return rateSubmissionService.create(userId, request);
     }
 
     @GetMapping("/{id}")
@@ -44,7 +42,8 @@ public class RateSubmissionController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
-        rateSubmissionService.delete(id);
+    public void delete(@PathVariable Long id, HttpServletRequest httpRequest) {
+        Long userId = (Long) httpRequest.getAttribute("userId");
+        rateSubmissionService.delete(userId, id);
     }
 }

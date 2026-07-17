@@ -28,14 +28,13 @@ public class RateSubmissionService {
     private final UserRepository userRepository;
 
     @Transactional
-    public RateSubmissionResponse create(RateSubmissionRequest request) {
+    public RateSubmissionResponse create(Long userId, RateSubmissionRequest request) {
         JobCategory jobCategory = jobCategoryRepository.findById(request.getJobCategoryId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid job category"));
         ExperienceLevel experienceLevel = experienceLevelRepository.findById(request.getExperienceLevelId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid experience level"));
-        User user = request.getUserId() != null
-                ? userRepository.findById(request.getUserId()).orElse(null)
-                : null;
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found: id=" + userId));
 
         RateSubmission submission = RateSubmission.builder()
                 .jobCategory(jobCategory)
@@ -56,7 +55,7 @@ public class RateSubmissionService {
         }
 
         submission = rateSubmissionRepository.save(submission);
-        log.info("rate submission created submissionId={} userId={}", submission.getId(), request.getUserId());
+        log.info("rate submission created submissionId={} userId={}", submission.getId(), userId);
         return toResponse(submission);
     }
 
@@ -68,22 +67,29 @@ public class RateSubmissionService {
     }
 
     @Transactional
-    public void delete(Long id) {
-        RateSubmission submission = rateSubmissionRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Submission not found: id=" + id));
-        submission.hide();
+    public void delete(Long userId, Long submissionId) {
+        getOwnedSubmission(userId, submissionId).hide();
+        log.info("rate submission deleted submissionId={} userId={}", submissionId, userId);
     }
 
     @Transactional
     public RateSubmissionResponse updateProjectName(Long userId, Long submissionId, ProjectNameUpdateRequest request) {
+        RateSubmission submission = getOwnedSubmission(userId, submissionId);
+        submission.updateProjectName(request.getProjectName());
+        log.info("rate submission project name updated submissionId={} userId={}", submissionId, userId);
+        return toResponse(submission);
+    }
+
+    /**
+     * 소유자가 아니면 리소스의 존재 여부를 노출하지 않도록 404로 응답한다.
+     */
+    private RateSubmission getOwnedSubmission(Long userId, Long submissionId) {
         RateSubmission submission = rateSubmissionRepository.findById(submissionId)
                 .orElseThrow(() -> new NotFoundException("Submission not found: id=" + submissionId));
         if (submission.getUser() == null || !submission.getUser().getId().equals(userId)) {
             throw new NotFoundException("Submission not found: id=" + submissionId);
         }
-        submission.updateProjectName(request.getProjectName());
-        log.info("rate submission project name updated submissionId={} userId={}", submissionId, userId);
-        return toResponse(submission);
+        return submission;
     }
 
     private RateSubmissionResponse toResponse(RateSubmission s) {
