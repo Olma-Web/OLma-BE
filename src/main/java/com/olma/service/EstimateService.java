@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
@@ -98,22 +99,29 @@ public class EstimateService {
                 request.getNegotiationTargetBudgetAmount(),
                 baseDailyRate);
         if (user != null) {
-            saved = savedEstimateRepository.save(SavedEstimate.builder()
-                    .user(user)
-                    .experienceLevel(experienceLevel)
-                    .jobCategory(jobCategory)
-                    .baseAmount(baseDailyRate)
-                    .screenCount(request.getScreenCount())
-                    .uxEngagement(request.getUxEngagement())
-                    .uxMultiplier(uxMultiplier)
-                    .platformEnvironment(request.getPlatformEnvironment())
-                    .platformMultiplier(platformMultiplier)
-                    .addons(addonNames)
-                    .addonPercent(addonPercent)
-                    .finalAmount(finalAmount)
-                    .projectName(request.getProjectName())
-                    .negotiationResult(negotiationResult)
-                    .build());
+            saved = selectCanonicalEstimate(
+                    findDuplicateSavedEstimate(user.getId(), request, addonNames, addonPercent, finalAmount)
+            );
+            if (saved != null) {
+                saved.mergeSaveRequest(request.getProjectName(), negotiationResult);
+            } else {
+                saved = savedEstimateRepository.save(SavedEstimate.builder()
+                        .user(user)
+                        .experienceLevel(experienceLevel)
+                        .jobCategory(jobCategory)
+                        .baseAmount(baseDailyRate)
+                        .screenCount(request.getScreenCount())
+                        .uxEngagement(request.getUxEngagement())
+                        .uxMultiplier(uxMultiplier)
+                        .platformEnvironment(request.getPlatformEnvironment())
+                        .platformMultiplier(platformMultiplier)
+                        .addons(addonNames)
+                        .addonPercent(addonPercent)
+                        .finalAmount(finalAmount)
+                        .projectName(request.getProjectName())
+                        .negotiationResult(negotiationResult)
+                        .build());
+            }
             savedEstimateId = saved.getId();
             log.info("estimate saved estimateId={} userId={}", savedEstimateId, user.getId());
         }
@@ -134,9 +142,49 @@ public class EstimateService {
                 .addonPercent(addonPercent)
                 .step4AddonFee(step4Addition)
                 .finalAmount(finalAmount)
-                .negotiationResult(negotiationResult)
+                .negotiationResult(saved != null ? saved.getNegotiationResult() : negotiationResult)
                 .createdAt(saved != null ? saved.getCreatedAt() : null)
                 .build();
+    }
+
+    private List<SavedEstimate> findDuplicateSavedEstimate(Long userId, EstimateCalculateRequest request,
+                                                           List<String> addonNames, int addonPercent,
+                                                           int finalAmount) {
+        return savedEstimateRepository
+                .findAllByUser_IdAndExperienceLevel_IdAndJobCategory_IdAndScreenCountAndUxEngagementAndPlatformEnvironmentAndAddonPercentAndFinalAmountOrderByCreatedAtDesc(
+                        userId,
+                        request.getExperienceLevelId(),
+                        request.getJobCategoryId(),
+                        request.getScreenCount(),
+                        request.getUxEngagement(),
+                        request.getPlatformEnvironment(),
+                        addonPercent,
+                        finalAmount
+                )
+                .stream()
+                .filter(estimate -> hasSameAddons(estimate, addonNames))
+                .toList();
+    }
+
+    private boolean hasSameAddons(SavedEstimate estimate, List<String> addonNames) {
+        return estimate.getAddons().stream().sorted().toList()
+                .equals(addonNames.stream().sorted().toList());
+    }
+
+    private SavedEstimate selectCanonicalEstimate(List<SavedEstimate> estimates) {
+        return estimates.stream()
+                .max(Comparator
+                        .comparingInt((SavedEstimate estimate) -> negotiationStatusRank(estimate.getNegotiationSimulationStatus()))
+                        .thenComparing(SavedEstimate::getCreatedAt))
+                .orElse(null);
+    }
+
+    private int negotiationStatusRank(NegotiationSimulationStatus status) {
+        return switch (status) {
+            case COMPLETED -> 2;
+            case IN_PROGRESS -> 1;
+            case NOT_STARTED -> 0;
+        };
     }
 
     @Transactional(readOnly = true)
