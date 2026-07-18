@@ -4,6 +4,7 @@ import com.olma.domain.entity.ExperienceLevel;
 import com.olma.domain.entity.JobCategory;
 import com.olma.domain.entity.RateSubmission;
 import com.olma.domain.entity.User;
+import com.olma.domain.enums.SubmissionStatus;
 import com.olma.domain.repository.ExperienceLevelRepository;
 import com.olma.domain.repository.JobCategoryRepository;
 import com.olma.domain.repository.RateSubmissionRepository;
@@ -62,7 +63,7 @@ public class RateSubmissionService {
 
     @Transactional(readOnly = true)
     public RateSubmissionResponse getById(Long id) {
-        RateSubmission submission = rateSubmissionRepository.findById(id)
+        RateSubmission submission = rateSubmissionRepository.findByIdAndStatus(id, SubmissionStatus.ACTIVE)
                 .orElseThrow(() -> new NotFoundException("Submission not found: id=" + id));
         return toResponse(submission);
     }
@@ -85,7 +86,7 @@ public class RateSubmissionService {
      * 제보가 없으면 404, 존재하지만 소유자가 아니면 403으로 응답한다.
      */
     private RateSubmission getOwnedSubmission(Long userId, Long submissionId) {
-        RateSubmission submission = rateSubmissionRepository.findById(submissionId)
+        RateSubmission submission = rateSubmissionRepository.findByIdAndStatus(submissionId, SubmissionStatus.ACTIVE)
                 .orElseThrow(() -> new NotFoundException("Submission not found: id=" + submissionId));
         if (submission.getUser() == null || !submission.getUser().getId().equals(userId)) {
             throw new ForbiddenException("본인이 생성한 단가 제보만 수정하거나 삭제할 수 있습니다.");
