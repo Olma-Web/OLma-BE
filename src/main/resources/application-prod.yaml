@@ -11,3 +11,7 @@ logging:
   level:
     com.olma: INFO
     org.springframework: WARN
+
+olma:
+  cors:
+    allowed-origin-patterns: ${CORS_ALLOWED_ORIGIN_PATTERNS:https://olma.kro.kr,https://*.olma.kro.kr}

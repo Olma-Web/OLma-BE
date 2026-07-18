@@ -57,3 +57,7 @@ logging:
 jwt:
   secret: ${JWT_SECRET}
   expiration: 86400000
+
+olma:
+  cors:
+    allowed-origin-patterns: ${CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:3000,http://localhost:3001}
