@@ -11,6 +11,7 @@ import com.olma.domain.repository.UserRepository;
 import com.olma.dto.ProjectNameUpdateRequest;
 import com.olma.dto.RateSubmissionRequest;
 import com.olma.dto.RateSubmissionResponse;
+import com.olma.exception.ForbiddenException;
 import com.olma.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -81,13 +82,13 @@ public class RateSubmissionService {
     }
 
     /**
-     * 소유자가 아니면 리소스의 존재 여부를 노출하지 않도록 404로 응답한다.
+     * 제보가 없으면 404, 존재하지만 소유자가 아니면 403으로 응답한다.
      */
     private RateSubmission getOwnedSubmission(Long userId, Long submissionId) {
         RateSubmission submission = rateSubmissionRepository.findById(submissionId)
                 .orElseThrow(() -> new NotFoundException("Submission not found: id=" + submissionId));
         if (submission.getUser() == null || !submission.getUser().getId().equals(userId)) {
-            throw new NotFoundException("Submission not found: id=" + submissionId);
+            throw new ForbiddenException("본인이 생성한 단가 제보만 수정하거나 삭제할 수 있습니다.");
         }
         return submission;
     }
