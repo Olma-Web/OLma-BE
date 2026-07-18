@@ -1,6 +1,7 @@
 package com.olma.controller;
 
 import com.olma.dto.ChangePasswordRequest;
+import com.olma.dto.ProfileSpecProgressRequest;
 import com.olma.dto.SubmissionTimelineItem;
 import com.olma.dto.UserProfileResponse;
 import com.olma.dto.UserProfileUpdateRequest;
@@ -29,10 +30,30 @@ public class UserProfileController {
         return userProfileService.getProfile(userId);
     }
 
+    @GetMapping("/me/profile")
+    public UserProfileResponse getMyProfile(HttpServletRequest httpRequest) {
+        Long userId = (Long) httpRequest.getAttribute("userId");
+        return userProfileService.getProfile(userId);
+    }
+
     @PutMapping("/{userId}/profile")
     public UserProfileResponse updateProfile(@PathVariable Long userId,
                                              @RequestBody UserProfileUpdateRequest request) {
         return userProfileService.updateProfile(userId, request);
+    }
+
+    @PutMapping("/me/profile")
+    public UserProfileResponse updateMyProfile(@RequestBody UserProfileUpdateRequest request,
+                                               HttpServletRequest httpRequest) {
+        Long userId = (Long) httpRequest.getAttribute("userId");
+        return userProfileService.updateProfile(userId, request);
+    }
+
+    @PatchMapping("/me/profile/spec-progress")
+    public UserProfileResponse updateProfileSpecProgress(@Valid @RequestBody ProfileSpecProgressRequest request,
+                                                         HttpServletRequest httpRequest) {
+        Long userId = (Long) httpRequest.getAttribute("userId");
+        return userProfileService.updateProfileSpecProgress(userId, request);
     }
 
     @GetMapping("/{userId}/submissions")

@@ -1,8 +1,11 @@
 package com.olma.dto;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.olma.domain.enums.ProfileSpecStatus;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Getter
@@ -16,6 +19,11 @@ public class UserProfileResponse {
     private Long experienceLevelId;
     private String experienceLevelLabel;
     private List<CertificateInfo> certificates;
+    private ProfileSpecStatus profileSpecStatus;
+    private JsonNode profileSpecState;
+    private OffsetDateTime profileSpecStartedAt;
+    private OffsetDateTime profileSpecUpdatedAt;
+    private OffsetDateTime profileSpecCompletedAt;
 
     @Getter
     @Builder

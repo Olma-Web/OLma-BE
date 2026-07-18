@@ -22,16 +22,19 @@ jobs:
 
       - name: Ensure monitoring environment file
         run: |
-          if [ ! -f /home/ubuntu/monitoring.env ]; then
-            cat > /home/ubuntu/monitoring.env << 'EOF'
-          DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/WEBHOOK_ID/WEBHOOK_TOKEN
-          EOF
-            sed -i 's/^          //' /home/ubuntu/monitoring.env
-            chmod 600 /home/ubuntu/monitoring.env
-          fi
+          touch /home/ubuntu/monitoring.env
+          grep -q '^DISCORD_WEBHOOK_URL=' /home/ubuntu/monitoring.env || \
+            echo 'DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/WEBHOOK_ID/WEBHOOK_TOKEN' >> /home/ubuntu/monitoring.env
+          grep -q '^GRAFANA_ADMIN_PASSWORD=' /home/ubuntu/monitoring.env || \
+            echo "GRAFANA_ADMIN_PASSWORD=$(openssl rand -base64 24)" >> /home/ubuntu/monitoring.env
+          chmod 600 /home/ubuntu/monitoring.env
 
       - name: Deploy monitoring stack
         working-directory: monitoring
         run: |
+          set -a
+          . /home/ubuntu/monitoring.env
+          set +a
           docker compose up -d --remove-orphans
+          docker exec grafana grafana cli admin reset-admin-password "$GRAFANA_ADMIN_PASSWORD"
           docker compose restart prometheus grafana
