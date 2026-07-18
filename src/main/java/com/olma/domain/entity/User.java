@@ -38,6 +38,10 @@ public class User {
     @JoinColumn(name = "job_category_id")
     private JobCategory jobCategory;
 
+    // 발급된 토큰의 세대. 로그아웃 시 증가시켜 이전 세대 토큰을 무효화한다.
+    @Column(name = "token_version", nullable = false)
+    private int tokenVersion = 0;
+
     @Builder
     public User(String email, String password, String nickname,
                 ExperienceLevel experienceLevel, JobCategory jobCategory) {
@@ -55,5 +59,9 @@ public class User {
 
     public void changePassword(String newPasswordHash) {
         this.password = newPasswordHash;
+    }
+
+    public void increaseTokenVersion() {
+        this.tokenVersion++;
     }
 }

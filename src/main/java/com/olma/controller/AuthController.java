@@ -32,6 +32,7 @@ public class AuthController {
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @SecurityRequirement(name = "BearerAuth")
-    public void logout() {
+    public void logout(HttpServletRequest req) {
+        authService.logout((Long) req.getAttribute("userId"));
     }
 }
