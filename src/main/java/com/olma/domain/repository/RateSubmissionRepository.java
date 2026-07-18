@@ -8,10 +8,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface RateSubmissionRepository extends JpaRepository<RateSubmission, Long> {
 
     List<RateSubmission> findAllByUser_IdAndStatusOrderByCreatedAtDesc(Long userId, SubmissionStatus status);
+
+    Optional<RateSubmission> findByIdAndStatus(Long id, SubmissionStatus status);
+
+    Optional<RateSubmission> findByIdAndUser_IdAndStatus(Long id, Long userId, SubmissionStatus status);
 
     @Query(value = """
             SELECT

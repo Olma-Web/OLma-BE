@@ -4,6 +4,7 @@ import com.olma.domain.entity.ExperienceLevel;
 import com.olma.domain.entity.JobCategory;
 import com.olma.domain.entity.RateSubmission;
 import com.olma.domain.entity.User;
+import com.olma.domain.enums.SubmissionStatus;
 import com.olma.domain.repository.ExperienceLevelRepository;
 import com.olma.domain.repository.JobCategoryRepository;
 import com.olma.domain.repository.RateSubmissionRepository;
@@ -62,21 +63,22 @@ public class RateSubmissionService {
 
     @Transactional(readOnly = true)
     public RateSubmissionResponse getById(Long id) {
-        RateSubmission submission = rateSubmissionRepository.findById(id)
+        RateSubmission submission = rateSubmissionRepository.findByIdAndStatus(id, SubmissionStatus.ACTIVE)
                 .orElseThrow(() -> new NotFoundException("Submission not found: id=" + id));
         return toResponse(submission);
     }
 
     @Transactional
-    public void delete(Long id) {
-        RateSubmission submission = rateSubmissionRepository.findById(id)
+    public void delete(Long userId, Long id) {
+        RateSubmission submission = rateSubmissionRepository.findByIdAndUser_IdAndStatus(id, userId, SubmissionStatus.ACTIVE)
                 .orElseThrow(() -> new NotFoundException("Submission not found: id=" + id));
         submission.hide();
+        log.info("rate submission hidden submissionId={} userId={}", id, userId);
     }
 
     @Transactional
     public RateSubmissionResponse updateProjectName(Long userId, Long submissionId, ProjectNameUpdateRequest request) {
-        RateSubmission submission = rateSubmissionRepository.findById(submissionId)
+        RateSubmission submission = rateSubmissionRepository.findByIdAndStatus(submissionId, SubmissionStatus.ACTIVE)
                 .orElseThrow(() -> new NotFoundException("Submission not found: id=" + submissionId));
         if (submission.getUser() == null || !submission.getUser().getId().equals(userId)) {
             throw new NotFoundException("Submission not found: id=" + submissionId);

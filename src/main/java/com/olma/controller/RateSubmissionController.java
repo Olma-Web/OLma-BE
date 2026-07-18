@@ -49,7 +49,7 @@ public class RateSubmissionController {
 
     @Operation(
             summary = "단가 제보 단건 조회",
-            description = "ID로 단가 제보를 조회합니다. 현재 구현은 HIDDEN 상태의 제보도 반환합니다."
+            description = "ID로 ACTIVE 상태의 단가 제보를 조회합니다. HIDDEN 상태의 제보는 404를 반환합니다."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "단가 제보 조회 성공",
@@ -86,17 +86,19 @@ public class RateSubmissionController {
 
     @Operation(
             summary = "단가 제보 소프트 삭제",
-            description = "단가 제보의 상태를 HIDDEN으로 변경합니다. 현재 구현은 소유권 검사를 하지 않는 개선 대상입니다."
+            description = "본인이 생성한 ACTIVE 상태의 단가 제보를 HIDDEN으로 변경합니다. 소유자가 아니면 존재하지 않는 리소스처럼 404를 반환합니다."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "소프트 삭제 성공", content = @Content),
             @ApiResponse(responseCode = "401", description = "JWT 미제공 또는 유효하지 않은 토큰", content = @Content),
-            @ApiResponse(responseCode = "404", description = "해당 ID의 제보가 없음", content = @Content)
+            @ApiResponse(responseCode = "404", description = "제보가 없거나 요청자가 소유자가 아님", content = @Content)
     })
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@Parameter(description = "단가 제보 ID", example = "1")
-                       @PathVariable Long id) {
-        rateSubmissionService.delete(id);
+                       @PathVariable Long id,
+                       HttpServletRequest httpRequest) {
+        Long userId = (Long) httpRequest.getAttribute("userId");
+        rateSubmissionService.delete(userId, id);
     }
 }
