@@ -33,8 +33,8 @@ public class RateSubmissionService {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid job category"));
         ExperienceLevel experienceLevel = experienceLevelRepository.findById(request.getExperienceLevelId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid experience level"));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found: id=" + userId));
+        // getReferenceById 를 이용해서 프록시 객체를 생성
+        User user = userRepository.getReferenceById(userId);
 
         RateSubmission submission = RateSubmission.builder()
                 .jobCategory(jobCategory)

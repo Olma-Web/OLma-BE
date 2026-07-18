@@ -60,4 +60,8 @@ public class User {
     public void changePassword(String newPasswordHash) {
         this.password = newPasswordHash;
     }
+
+    public void increaseTokenVersion() {
+        this.tokenVersion++;
+    }
 }

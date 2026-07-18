@@ -109,7 +109,7 @@ public class UserProfileService {
             throw new InvalidCredentialsException("현재 비밀번호가 올바르지 않습니다.");
         }
         user.changePassword(passwordEncoder.encode(request.getNewPassword()));
-        userRepository.increaseTokenVersion(userId);
+        user.increaseTokenVersion();
 
         log.info("password changed userId={}", userId);
     }
