@@ -12,6 +12,7 @@ import com.olma.domain.repository.UserRepository;
 import com.olma.dto.ProjectNameUpdateRequest;
 import com.olma.dto.RateSubmissionRequest;
 import com.olma.dto.RateSubmissionResponse;
+import com.olma.exception.ForbiddenException;
 import com.olma.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,8 +71,9 @@ public class RateSubmissionService {
 
     @Transactional
     public void delete(Long userId, Long id) {
-        RateSubmission submission = rateSubmissionRepository.findByIdAndUser_IdAndStatus(id, userId, SubmissionStatus.ACTIVE)
+        RateSubmission submission = rateSubmissionRepository.findByIdAndStatus(id, SubmissionStatus.ACTIVE)
                 .orElseThrow(() -> new NotFoundException("Submission not found: id=" + id));
+        validateOwner(submission, userId);
         submission.hide();
         log.info("rate submission hidden submissionId={} userId={}", id, userId);
     }
@@ -80,12 +82,16 @@ public class RateSubmissionService {
     public RateSubmissionResponse updateProjectName(Long userId, Long submissionId, ProjectNameUpdateRequest request) {
         RateSubmission submission = rateSubmissionRepository.findByIdAndStatus(submissionId, SubmissionStatus.ACTIVE)
                 .orElseThrow(() -> new NotFoundException("Submission not found: id=" + submissionId));
-        if (submission.getUser() == null || !submission.getUser().getId().equals(userId)) {
-            throw new NotFoundException("Submission not found: id=" + submissionId);
-        }
+        validateOwner(submission, userId);
         submission.updateProjectName(request.getProjectName());
         log.info("rate submission project name updated submissionId={} userId={}", submissionId, userId);
         return toResponse(submission);
+    }
+
+    private void validateOwner(RateSubmission submission, Long userId) {
+        if (submission.getUser() == null || !submission.getUser().getId().equals(userId)) {
+            throw new ForbiddenException("본인이 생성한 단가 제보만 수정하거나 삭제할 수 있습니다.");
+        }
     }
 
     private RateSubmissionResponse toResponse(RateSubmission s) {

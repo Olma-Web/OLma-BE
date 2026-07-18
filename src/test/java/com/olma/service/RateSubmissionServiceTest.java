@@ -12,6 +12,8 @@ import com.olma.domain.repository.ExperienceLevelRepository;
 import com.olma.domain.repository.JobCategoryRepository;
 import com.olma.domain.repository.RateSubmissionRepository;
 import com.olma.domain.repository.UserRepository;
+import com.olma.dto.ProjectNameUpdateRequest;
+import com.olma.exception.ForbiddenException;
 import com.olma.exception.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -22,7 +24,6 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -53,25 +54,51 @@ class RateSubmissionServiceTest {
     void deleteHidesOnlyOwnedActiveSubmission() {
         RateSubmission submission = submissionWithOwner(7L);
         ReflectionTestUtils.setField(submission, "id", 10L);
-        when(rateSubmissionRepository.findByIdAndUser_IdAndStatus(10L, 7L, SubmissionStatus.ACTIVE))
+        when(rateSubmissionRepository.findByIdAndStatus(10L, SubmissionStatus.ACTIVE))
                 .thenReturn(Optional.of(submission));
 
         service.delete(7L, 10L);
 
-        verify(rateSubmissionRepository).findByIdAndUser_IdAndStatus(10L, 7L, SubmissionStatus.ACTIVE);
+        verify(rateSubmissionRepository).findByIdAndStatus(10L, SubmissionStatus.ACTIVE);
         assertThat(submission.getStatus()).isEqualTo(SubmissionStatus.HIDDEN);
     }
 
     @Test
     void deleteRejectsSubmissionOwnedByAnotherUser() {
-        when(rateSubmissionRepository.findByIdAndUser_IdAndStatus(10L, 7L, SubmissionStatus.ACTIVE))
+        RateSubmission submission = submissionWithOwner(8L);
+        ReflectionTestUtils.setField(submission, "id", 10L);
+        when(rateSubmissionRepository.findByIdAndStatus(10L, SubmissionStatus.ACTIVE))
+                .thenReturn(Optional.of(submission));
+
+        assertThatThrownBy(() -> service.delete(7L, 10L))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessage("본인이 생성한 단가 제보만 수정하거나 삭제할 수 있습니다.");
+
+        assertThat(submission.getStatus()).isEqualTo(SubmissionStatus.ACTIVE);
+    }
+
+    @Test
+    void deleteReturnsNotFoundWhenSubmissionIsMissingOrHidden() {
+        when(rateSubmissionRepository.findByIdAndStatus(10L, SubmissionStatus.ACTIVE))
                 .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.delete(7L, 10L))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("Submission not found: id=10");
+    }
 
-        verify(rateSubmissionRepository, never()).findById(10L);
+    @Test
+    void updateProjectNameRejectsSubmissionOwnedByAnotherUser() {
+        RateSubmission submission = submissionWithOwner(8L);
+        ReflectionTestUtils.setField(submission, "id", 10L);
+        when(rateSubmissionRepository.findByIdAndStatus(10L, SubmissionStatus.ACTIVE))
+                .thenReturn(Optional.of(submission));
+        ProjectNameUpdateRequest request = new ProjectNameUpdateRequest();
+        request.setProjectName("새 프로젝트");
+
+        assertThatThrownBy(() -> service.updateProjectName(7L, 10L, request))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessage("본인이 생성한 단가 제보만 수정하거나 삭제할 수 있습니다.");
     }
 
     private RateSubmission submissionWithOwner(Long userId) {

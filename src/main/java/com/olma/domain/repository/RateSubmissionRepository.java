@@ -16,8 +16,6 @@ public interface RateSubmissionRepository extends JpaRepository<RateSubmission, 
 
     Optional<RateSubmission> findByIdAndStatus(Long id, SubmissionStatus status);
 
-    Optional<RateSubmission> findByIdAndUser_IdAndStatus(Long id, Long userId, SubmissionStatus status);
-
     @Query(value = """
             SELECT
                 count(*) AS n,
