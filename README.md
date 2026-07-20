@@ -71,14 +71,14 @@ export JWT_SECRET=local-development-secret-key
 
 ## 관련 문서
 
-- 백엔드 아키텍처: https://docs.olma.kro.kr/development/architecture-overview
-- 요청 처리 흐름: https://docs.olma.kro.kr/development/request-flow
-- 데이터 모델: https://docs.olma.kro.kr/development/data-model
-- 도메인 지식 가이드: https://docs.olma.kro.kr/development/domain-knowledge-guide
-- API 공통 규격: https://docs.olma.kro.kr/api/common
-- 도메인별 API 요약: https://docs.olma.kro.kr/api/domain-summary
-- 배포 문서: https://docs.olma.kro.kr/ops/deploy
-- 런타임 설정: https://docs.olma.kro.kr/ops/runtime-configuration
-- 로깅/모니터링: https://docs.olma.kro.kr/observability/logging
+- 백엔드 아키텍처: https://olma-web.github.io/OLma-Docs/development/architecture-overview
+- 요청 처리 흐름: https://olma-web.github.io/OLma-Docs/development/request-flow
+- 데이터 모델: https://olma-web.github.io/OLma-Docs/development/data-model
+- 도메인 지식 가이드: https://olma-web.github.io/OLma-Docs/development/domain-knowledge-guide
+- API 공통 규격: https://olma-web.github.io/OLma-Docs/api/common
+- 도메인별 API 요약: https://olma-web.github.io/OLma-Docs/api/domain-summary
+- 배포 문서: https://olma-web.github.io/OLma-Docs/ops/deploy
+- 런타임 설정: https://olma-web.github.io/OLma-Docs/ops/runtime-configuration
+- 로깅/모니터링: https://olma-web.github.io/OLma-Docs/observability/logging
 
-> 운영 도메인 종료 후에는 `OLma-Docs` 레포지토리를 로컬에서 실행해 문서를 확인할 수 있습니다.
+> 운영 도메인 종료 후에는 GitHub Pages 또는 `OLma-Docs` 레포지토리의 로컬 실행으로 문서를 확인할 수 있습니다.
